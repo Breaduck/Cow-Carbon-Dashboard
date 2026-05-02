@@ -1,0 +1,179 @@
+import { Link, useLocation } from 'react-router-dom';
+import { useStore } from '../../store/useStore';
+import { dashboardStats } from '../../data';
+import { LIVESTOCK_INFO } from '../../types';
+
+export function Sidebar() {
+  const location = useLocation();
+  const { isSidebarOpen, filters, setFilter, resetFilters } = useStore();
+
+  if (!isSidebarOpen) {
+    return null;
+  }
+
+  const livestockTypes = ['beef_cattle', 'dairy_cattle', 'pig'] as const;
+  const grades = ['A', 'B', 'C'] as const;
+
+  return (
+    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-64px)] sticky top-16">
+      {/* 통계 요약 */}
+      <div className="p-4 border-b border-gray-100">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+          전체 현황
+        </h3>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">인증 농장</span>
+            <span className="text-sm font-bold text-gray-900">{dashboardStats.totalFarms}개</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">활성 알림</span>
+            <span className="text-sm font-bold text-red-600">{dashboardStats.alertCount}건</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 축종별 필터 */}
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            축종별 필터
+          </h3>
+          {filters.livestock.length > 0 && (
+            <button
+              onClick={() => setFilter('livestock', [])}
+              className="text-xs text-primary-600 hover:text-primary-700"
+            >
+              초기화
+            </button>
+          )}
+        </div>
+        <div className="space-y-2">
+          {livestockTypes.map(type => {
+            const info = LIVESTOCK_INFO[type];
+            const count = dashboardStats.farmsByLivestock[type];
+            const isSelected = filters.livestock.includes(type);
+
+            return (
+              <button
+                key={type}
+                onClick={() => {
+                  if (isSelected) {
+                    setFilter('livestock', filters.livestock.filter(t => t !== type));
+                  } else {
+                    setFilter('livestock', [...filters.livestock, type]);
+                  }
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isSelected
+                    ? 'bg-primary-50 text-primary-700 border border-primary-200'
+                    : 'hover:bg-gray-50 text-gray-700'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: info.color }}
+                  />
+                  <span>{info.nameKo}</span>
+                </div>
+                <span className="text-xs text-gray-500">{count}개</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 인증 등급 필터 */}
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            인증 등급
+          </h3>
+          {filters.grade.length > 0 && (
+            <button
+              onClick={() => setFilter('grade', [])}
+              className="text-xs text-primary-600 hover:text-primary-700"
+            >
+              초기화
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          {grades.map(grade => {
+            const isSelected = filters.grade.includes(grade);
+            const count = dashboardStats.farmsByGrade[grade];
+
+            return (
+              <button
+                key={grade}
+                onClick={() => {
+                  if (isSelected) {
+                    setFilter('grade', filters.grade.filter(g => g !== grade));
+                  } else {
+                    setFilter('grade', [...filters.grade, grade]);
+                  }
+                }}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isSelected
+                    ? grade === 'A' ? 'bg-green-100 text-green-700 border border-green-200' :
+                      grade === 'B' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                      'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <div>{grade}등급</div>
+                <div className="text-xs opacity-70">{count}</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 네비게이션 */}
+      <div className="p-4 flex-1">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+          메뉴
+        </h3>
+        <nav className="space-y-1">
+          <Link
+            to="/"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+              location.pathname === '/'
+                ? 'bg-primary-50 text-primary-700'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            전국 지도
+          </Link>
+          <Link
+            to="/dashboard"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+              location.pathname.startsWith('/dashboard')
+                ? 'bg-primary-50 text-primary-700'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            농장 대시보드
+          </Link>
+        </nav>
+      </div>
+
+      {/* 하단 */}
+      <div className="p-4 border-t border-gray-100">
+        <button
+          onClick={resetFilters}
+          className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+        >
+          모든 필터 초기화
+        </button>
+      </div>
+    </aside>
+  );
+}
