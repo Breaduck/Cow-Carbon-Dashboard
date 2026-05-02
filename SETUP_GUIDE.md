@@ -4,26 +4,29 @@
 ✅ 프로젝트 완료
 ✅ 개발 서버 실행 중: http://localhost:5173
 
-## 2. Kakao Map API 설정 (필수)
+## 2. Google Maps API 설정 (필수)
 
 ### API 키 발급
-1. https://developers.kakao.com 접속
-2. 로그인 후 '내 애플리케이션' 클릭
-3. '애플리케이션 추가하기' 클릭
-4. 앱 이름 입력 후 저장
-5. 'JavaScript 키' 복사
+1. https://console.cloud.google.com/ 접속
+2. 새 프로젝트 생성 또는 기존 프로젝트 선택
+3. "API 및 서비스" > "사용자 인증 정보" 클릭
+4. "사용자 인증 정보 만들기" > "API 키" 클릭
+5. "Maps JavaScript API" 활성화
+6. API 키 복사
+
+**무료 크레딧**: 매월 $200 무료 (신용카드 등록 필요)
 
 ### API 키 적용
-`index.html` 파일 6번째 줄 수정:
+`src/pages/MapPage.tsx` 파일 9번째 줄 수정:
 
 **변경 전:**
-```html
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APP_KEY&libraries=clusterer,services"></script>
+```typescript
+const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';
 ```
 
 **변경 후:**
-```html
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=여기에발급받은키입력&libraries=clusterer,services"></script>
+```typescript
+const GOOGLE_MAPS_API_KEY = '여기에_발급받은_API_키_입력';
 ```
 
 ## 3. 실행 명령어
@@ -85,10 +88,11 @@ src/
 
 ## 문제 해결
 
-### 카카오맵이 안 보일 때
-- API 키 확인
+### 구글 맵이 안 보일 때
+- API 키 확인 (`src/pages/MapPage.tsx`)
+- Maps JavaScript API가 활성화되어 있는지 확인
 - 개발자 도구(F12) Console 탭에서 에러 확인
-- API 키 없어도 하단 농장 목록으로 데이터 확인 가능
+- 무료 크레딧 한도 확인 ($200/월)
 
 ### 포트 충돌 시
 ```bash

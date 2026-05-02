@@ -23,7 +23,7 @@
 - Recharts
 - Zustand
 - React Router
-- Kakao Map API
+- Google Maps API (@react-google-maps/api)
 
 ## 시작하기
 
@@ -33,13 +33,15 @@
 npm install
 ```
 
-### 2. Kakao Map API 키 설정
+### 2. Google Maps API 키 설정
 
-`index.html` 파일에서 `YOUR_KAKAO_APP_KEY`를 실제 카카오 API 키로 교체하세요.
+`src/pages/MapPage.tsx` 파일 9번째 줄에서 API 키를 교체하세요.
 
-```html
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=실제_API_키&libraries=clusterer,services"></script>
+```typescript
+const GOOGLE_MAPS_API_KEY = '여기에_실제_API_키_입력';
 ```
+
+**API 키 발급**: https://developers.google.com/maps/documentation/javascript/get-api-key
 
 ### 3. 개발 서버 실행
 
