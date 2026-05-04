@@ -6,7 +6,7 @@ import { StatCard } from '../components/common';
 import { LIVESTOCK_INFO, Farm } from '../types';
 import { dashboardStats } from '../data';
 
-const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';
+const STORAGE_KEY = 'google_maps_api_key';
 
 const mapContainerStyle = {
   width: '100%',
@@ -35,21 +35,64 @@ const mapOptions = {
 
 export function MapPage() {
   const navigate = useNavigate();
-  const { filteredFarms, selectFarm, filters } = useStore();
+  const { filteredFarms, selectFarm, filters, setFilter } = useStore();
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
+  const [inputKey, setInputKey] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!apiKey);
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: apiKey || 'dummy-key-to-prevent-error',
   });
 
+  const handleSaveApiKey = useCallback(() => {
+    if (inputKey.trim()) {
+      localStorage.setItem(STORAGE_KEY, inputKey.trim());
+      setApiKey(inputKey.trim());
+      setShowApiKeyInput(false);
+      window.location.reload();
+    }
+  }, [inputKey]);
+
+  const handleChangeApiKey = useCallback(() => {
+    setShowApiKeyInput(true);
+  }, []);
+
   const livestockStats = useMemo(() => {
-    return Object.entries(LIVESTOCK_INFO).map(([key, info]) => ({
+    // 한우, 돼지, 젖소 순서로 정렬
+    const order: Array<keyof typeof LIVESTOCK_INFO> = ['beef_cattle', 'pig', 'dairy_cattle'];
+    return order.map((key) => ({
       type: key,
-      ...info,
-      count: dashboardStats.farmsByLivestock[key as keyof typeof dashboardStats.farmsByLivestock],
-      headCount: dashboardStats.totalHeadCount[key as keyof typeof dashboardStats.totalHeadCount],
+      ...LIVESTOCK_INFO[key],
+      count: dashboardStats.farmsByLivestock[key],
+      headCount: dashboardStats.totalHeadCount[key],
     }));
   }, []);
+
+  const handleLivestockClick = useCallback((livestockType: string) => {
+    // 현재 필터에 해당 축종이 있으면 제거, 없으면 추가
+    const currentLivestock = [...filters.livestock];
+    const index = currentLivestock.indexOf(livestockType as LivestockType);
+
+    if (index > -1) {
+      currentLivestock.splice(index, 1);
+    } else {
+      currentLivestock.push(livestockType as LivestockType);
+    }
+
+    setFilter('livestock', currentLivestock);
+  }, [filters.livestock, setFilter]);
+
+  // 디버깅: 농장 데이터 확인
+  console.log('MapPage Debug:', {
+    totalFarms: filteredFarms.length,
+    firstFarm: filteredFarms[0],
+    sampleCoordinates: filteredFarms.slice(0, 3).map(f => ({
+      name: f.name,
+      lat: f.location.coordinates.lat,
+      lng: f.location.coordinates.lng,
+    })),
+  });
 
   const handleMarkerClick = useCallback((farm: Farm) => {
     setSelectedFarm(farm);
@@ -63,6 +106,68 @@ export function MapPage() {
     selectFarm(farm.id);
     navigate(`/dashboard/${farm.id}`);
   }, [navigate, selectFarm]);
+
+  // API 키가 없으면 입력 화면 표시
+  if (showApiKeyInput) {
+    return (
+      <div className="h-full flex items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-xl p-8 shadow-2xl max-w-lg mx-4 text-center">
+          <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Google Maps API 키 입력</h3>
+          <p className="text-gray-600 mb-4">
+            지도를 사용하려면 Google Maps API 키가 필요합니다.
+          </p>
+
+          <div className="mb-4">
+            <input
+              type="text"
+              value={inputKey}
+              onChange={(e) => setInputKey(e.target.value)}
+              placeholder="API 키를 입력하세요"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              onKeyPress={(e) => e.key === 'Enter' && handleSaveApiKey()}
+            />
+          </div>
+
+          <button
+            onClick={handleSaveApiKey}
+            disabled={!inputKey.trim()}
+            className="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors mb-3"
+          >
+            저장하고 시작하기
+          </button>
+
+          <a
+            href="https://developers.google.com/maps/documentation/javascript/get-api-key"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-primary-600 hover:text-primary-700 text-sm underline"
+          >
+            API 키 발급받기
+          </a>
+
+          <div className="mt-6 bg-gray-50 rounded-lg p-4 text-left">
+            <p className="text-sm text-gray-500 mb-2">전국 {dashboardStats.totalFarms}개 농장 데이터 준비 완료</p>
+            <div className="flex flex-wrap gap-2">
+              {livestockStats.map(stat => (
+                <span
+                  key={stat.type}
+                  className="px-3 py-1 rounded-full text-sm text-white"
+                  style={{ backgroundColor: stat.color }}
+                >
+                  {stat.icon} {stat.nameKo} {stat.count}개
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loadError) {
     return (
@@ -122,6 +227,7 @@ export function MapPage() {
                 stat.type === 'dairy_cattle' ? 'blue' : 'red'
               }
               icon={<span className="text-2xl">{stat.icon}</span>}
+              onClick={() => handleLivestockClick(stat.type)}
             />
           ))}
         </div>
@@ -161,40 +267,31 @@ export function MapPage() {
           center={center}
           zoom={7}
           options={mapOptions}
+          onLoad={() => console.log('Google Map loaded!')}
         >
-          <MarkerClustererF
-            averageCenter
-            enableRetinaIcons
-            gridSize={60}
-          >
-            {(clusterer) => (
-              <>
-                {filteredFarms.map(farm => {
-                  const livestockInfo = LIVESTOCK_INFO[farm.livestock.type];
+          {filteredFarms.map(farm => {
+            const livestockInfo = LIVESTOCK_INFO[farm.livestock.type];
 
-                  return (
-                    <MarkerF
-                      key={farm.id}
-                      position={{
-                        lat: farm.location.coordinates.lat,
-                        lng: farm.location.coordinates.lng,
-                      }}
-                      clusterer={clusterer}
-                      onClick={() => handleMarkerClick(farm)}
-                      icon={{
-                        path: google.maps.SymbolPath.CIRCLE,
-                        fillColor: livestockInfo.color,
-                        fillOpacity: 0.8,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 2,
-                        scale: 8,
-                      }}
-                    />
-                  );
-                })}
-              </>
-            )}
-          </MarkerClustererF>
+            return (
+              <MarkerF
+                key={farm.id}
+                position={{
+                  lat: farm.location.coordinates.lat,
+                  lng: farm.location.coordinates.lng,
+                }}
+                onClick={() => handleMarkerClick(farm)}
+                icon={{
+                  path: google.maps.SymbolPath.CIRCLE,
+                  fillColor: livestockInfo.color,
+                  fillOpacity: 0.8,
+                  strokeColor: '#ffffff',
+                  strokeWeight: 2,
+                  scale: 8,
+                }}
+                onLoad={() => console.log('Marker loaded:', farm.name)}
+              />
+            );
+          })}
 
           {/* InfoWindow */}
           {selectedFarm && (
@@ -228,46 +325,13 @@ export function MapPage() {
           )}
         </GoogleMap>
 
-        {/* API 키 안내 오버레이 */}
-        {GOOGLE_MAPS_API_KEY === 'YOUR_GOOGLE_MAPS_API_KEY' && (
-          <div className="absolute inset-0 bg-white/95 flex items-center justify-center pointer-events-none">
-            <div className="bg-white rounded-xl p-8 shadow-2xl max-w-lg mx-4 text-center pointer-events-auto">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Google Maps API 키 필요</h3>
-              <p className="text-gray-600 mb-4">
-                <code className="bg-gray-100 px-2 py-1 rounded text-sm">src/pages/MapPage.tsx</code>의<br />
-                <code className="bg-gray-100 px-2 py-1 rounded text-sm">GOOGLE_MAPS_API_KEY</code>를<br />
-                실제 API 키로 교체해주세요.
-              </p>
-              <a
-                href="https://developers.google.com/maps/documentation/javascript/get-api-key"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
-              >
-                API 키 발급받기
-              </a>
-              <div className="mt-6 bg-gray-50 rounded-lg p-4 text-left">
-                <p className="text-sm text-gray-500 mb-2">전국 {dashboardStats.totalFarms}개 농장 데이터 준비 완료</p>
-                <div className="flex flex-wrap gap-2">
-                  {livestockStats.map(stat => (
-                    <span
-                      key={stat.type}
-                      className="px-3 py-1 rounded-full text-sm text-white"
-                      style={{ backgroundColor: stat.color }}
-                    >
-                      {stat.icon} {stat.nameKo} {stat.count}개
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* API 키 변경 버튼 */}
+        <button
+          onClick={handleChangeApiKey}
+          className="absolute bottom-4 right-4 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg shadow-sm text-sm text-gray-700 transition-colors"
+        >
+          API 키 변경
+        </button>
       </div>
     </div>
   );

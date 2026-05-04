@@ -50,6 +50,7 @@ interface StatCardProps {
     label: string;
   };
   color?: 'default' | 'green' | 'red' | 'yellow' | 'blue';
+  onClick?: () => void;
 }
 
 export function StatCard({
@@ -59,6 +60,7 @@ export function StatCard({
   icon,
   trend,
   color = 'default',
+  onClick,
 }: StatCardProps) {
   const colorClasses = {
     default: 'bg-gray-50',
@@ -77,7 +79,10 @@ export function StatCard({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+    <div
+      className={`bg-white rounded-xl border border-gray-200 shadow-sm p-4 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm text-gray-500">{title}</p>

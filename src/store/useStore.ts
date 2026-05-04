@@ -79,8 +79,8 @@ export const useStore = create<AppState>((set, get) => ({
     }));
   },
 
-  // 필터링된 농장
-  filteredFarms: initialFarms,
+  // 필터링된 농장 (초기에는 빈 배열 - 필터 선택 시에만 표시)
+  filteredFarms: [],
 
   // 농장 선택
   selectFarm: (farmId) => {
@@ -128,12 +128,12 @@ export const useStore = create<AppState>((set, get) => ({
 // 필터 헬퍼 함수
 function filterFarms(farms: Farm[], filters: FilterState): Farm[] {
   return farms.filter(farm => {
-    // 축종 필터
+    // 축종 필터 (비어있으면 모든 축종 허용)
     if (filters.livestock.length > 0 && !filters.livestock.includes(farm.livestock.type)) {
       return false;
     }
 
-    // 등급 필터
+    // 등급 필터 (비어있으면 모든 등급 허용)
     if (filters.grade.length > 0 && !filters.grade.includes(farm.certification.grade)) {
       return false;
     }

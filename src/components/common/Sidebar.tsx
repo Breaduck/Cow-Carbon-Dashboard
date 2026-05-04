@@ -11,7 +11,7 @@ export function Sidebar() {
     return null;
   }
 
-  const livestockTypes = ['beef_cattle', 'dairy_cattle', 'pig'] as const;
+  const livestockTypes = ['beef_cattle', 'pig', 'dairy_cattle'] as const;
   const grades = ['A', 'B', 'C'] as const;
 
   return (

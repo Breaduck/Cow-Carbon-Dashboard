@@ -33,23 +33,23 @@
 npm install
 ```
 
-### 2. Google Maps API 키 설정
-
-`src/pages/MapPage.tsx` 파일 9번째 줄에서 API 키를 교체하세요.
-
-```typescript
-const GOOGLE_MAPS_API_KEY = '여기에_실제_API_키_입력';
-```
-
-**API 키 발급**: https://developers.google.com/maps/documentation/javascript/get-api-key
-
-### 3. 개발 서버 실행
+### 2. 개발 서버 실행
 
 ```bash
 npm run dev
 ```
 
 http://localhost:5173 에서 확인하세요.
+
+### 3. Google Maps API 키 설정
+
+처음 지도 페이지를 열면 API 키 입력 화면이 나타납니다.
+
+1. [Google Maps API 키 발급받기](https://developers.google.com/maps/documentation/javascript/get-api-key)
+2. 웹사이트에서 API 키 입력
+3. 자동으로 브라우저에 저장됩니다 (localStorage)
+
+**보안 팁**: Google Cloud Console에서 API 키에 HTTP referrer 제한을 설정하세요 (예: `localhost:5173/*`, `yourdomain.com/*`)
 
 ## 프로젝트 구조
 

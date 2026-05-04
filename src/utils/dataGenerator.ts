@@ -46,25 +46,34 @@ class SeededRandom {
   }
 }
 
-// 지역별 좌표 범위 (대략적인 범위)
+// 지역별 좌표 범위 (한국 영토 내로 조정, 바다 제외)
 const REGION_BOUNDS: Record<string, { lat: [number, number]; lng: [number, number] }> = {
-  '서울특별시': { lat: [37.45, 37.70], lng: [126.80, 127.15] },
-  '부산광역시': { lat: [35.05, 35.25], lng: [128.90, 129.25] },
-  '대구광역시': { lat: [35.80, 36.00], lng: [128.45, 128.75] },
-  '인천광역시': { lat: [37.35, 37.60], lng: [126.35, 126.80] },
-  '광주광역시': { lat: [35.10, 35.25], lng: [126.80, 127.00] },
-  '대전광역시': { lat: [36.25, 36.45], lng: [127.30, 127.50] },
-  '울산광역시': { lat: [35.45, 35.70], lng: [129.15, 129.45] },
-  '세종특별자치시': { lat: [36.45, 36.65], lng: [127.15, 127.35] },
-  '경기도': { lat: [36.90, 38.00], lng: [126.50, 127.80] },
-  '강원도': { lat: [37.00, 38.50], lng: [127.50, 129.30] },
-  '충청북도': { lat: [36.40, 37.20], lng: [127.30, 128.20] },
-  '충청남도': { lat: [36.00, 36.90], lng: [126.10, 127.30] },
-  '전라북도': { lat: [35.40, 36.20], lng: [126.40, 127.60] },
-  '전라남도': { lat: [34.10, 35.40], lng: [126.10, 127.70] },
-  '경상북도': { lat: [35.70, 37.10], lng: [128.30, 130.00] },
-  '경상남도': { lat: [34.80, 35.70], lng: [127.80, 129.10] },
-  '제주특별자치도': { lat: [33.20, 33.55], lng: [126.15, 126.95] },
+  '경기도': { lat: [37.00, 37.90], lng: [126.70, 127.50] },
+  '충청남도': { lat: [36.20, 36.80], lng: [126.40, 127.20] },
+  '전라남도': { lat: [34.40, 35.30], lng: [126.30, 127.50] },
+  '경상남도': { lat: [34.90, 35.60], lng: [128.00, 128.90] },
+  '전북특별자치도': { lat: [35.50, 36.10], lng: [126.70, 127.50] },
+  '경상북도': { lat: [35.90, 37.00], lng: [128.40, 129.20] },
+  '충청북도': { lat: [36.50, 37.10], lng: [127.40, 128.00] },
+  '세종특별자치시': { lat: [36.48, 36.60], lng: [127.23, 127.32] },
+  '강원특별자치도': { lat: [37.30, 38.40], lng: [127.70, 128.50] },
+  '울산광역시': { lat: [35.50, 35.65], lng: [129.20, 129.35] },
+  '제주특별자치도': { lat: [33.25, 33.50], lng: [126.20, 126.85] },
+};
+
+// 시도별 시군구 목록
+const SIGUNGU_BY_SIDO: Record<string, string[]> = {
+  '경기도': ['수원시', '성남시', '고양시', '용인시', '안양시', '부천시', '평택시', '안산시', '화성시', '의정부시', '시흥시', '파주시', '김포시', '광주시', '이천시', '양주시', '포천시', '여주시', '연천군', '가평군'],
+  '충청남도': ['천안시', '공주시', '보령시', '아산시', '서산시', '논산시', '계룡시', '당진시', '금산군', '부여군', '서천군', '청양군', '홍성군', '예산군', '태안군'],
+  '전라남도': ['목포시', '여수시', '순천시', '나주시', '광양시', '담양군', '곡성군', '구례군', '고흥군', '보성군', '화순군', '장흥군', '강진군', '해남군', '영암군', '무안군', '함평군', '영광군', '장성군', '완도군', '진도군', '신안군'],
+  '경상남도': ['창원시', '진주시', '통영시', '사천시', '김해시', '밀양시', '거제시', '양산시', '의령군', '함안군', '창녕군', '고성군', '남해군', '하동군', '산청군', '함양군', '거창군', '합천군'],
+  '전북특별자치도': ['전주시', '군산시', '익산시', '정읍시', '남원시', '김제시', '완주군', '진안군', '무주군', '장수군', '임실군', '순창군', '고창군', '부안군'],
+  '경상북도': ['포항시', '경주시', '김천시', '안동시', '구미시', '영주시', '영천시', '상주시', '문경시', '경산시', '군위군', '의성군', '청송군', '영양군', '영덕군', '청도군', '고령군', '성주군', '칠곡군', '예천군', '봉화군', '울진군', '울릉군'],
+  '충청북도': ['청주시', '충주시', '제천시', '보은군', '옥천군', '영동군', '증평군', '진천군', '괴산군', '음성군', '단양군'],
+  '세종특별자치시': ['세종시'],
+  '강원특별자치도': ['춘천시', '원주시', '강릉시', '동해시', '태백시', '속초시', '삼척시', '홍천군', '횡성군', '영월군', '평창군', '정선군', '철원군', '화천군', '양구군', '인제군', '고성군', '양양군'],
+  '울산광역시': ['중구', '남구', '동구', '북구', '울주군'],
+  '제주특별자치도': ['제주시', '서귀포시'],
 };
 
 // 농장 이름 생성용 데이터
@@ -93,47 +102,40 @@ export function generateFarms(): Farm[] {
   const farms: Farm[] = [];
   const random = new SeededRandom(42);
 
-  // 축종별 비율 (2025년 실제 인증 농장 현황 기준)
-  const livestockDistribution: LivestockType[] = [
-    ...Array(42).fill('beef_cattle'),   // 12.4% (한우)
-    ...Array(187).fill('pig'),          // 55.2% (돼지)
-    ...Array(110).fill('dairy_cattle'), // 32.4% (젖소)
+  // 2025년 실제 시도별, 축종별 인증 농장 현황
+  const farmDistribution: Array<{ sido: string; livestock: LivestockType; count: number }> = [
+    { sido: '경기도', livestock: 'beef_cattle', count: 7 },
+    { sido: '경기도', livestock: 'pig', count: 12 },
+    { sido: '경기도', livestock: 'dairy_cattle', count: 98 },
+    { sido: '충청남도', livestock: 'beef_cattle', count: 1 },
+    { sido: '충청남도', livestock: 'pig', count: 40 },
+    { sido: '충청남도', livestock: 'dairy_cattle', count: 3 },
+    { sido: '전라남도', livestock: 'beef_cattle', count: 21 },
+    { sido: '전라남도', livestock: 'pig', count: 64 },
+    { sido: '전라남도', livestock: 'dairy_cattle', count: 4 },
+    { sido: '경상남도', livestock: 'pig', count: 39 },
+    { sido: '전북특별자치도', livestock: 'beef_cattle', count: 12 },
+    { sido: '전북특별자치도', livestock: 'pig', count: 12 },
+    { sido: '전북특별자치도', livestock: 'dairy_cattle', count: 1 },
+    { sido: '경상북도', livestock: 'pig', count: 7 },
+    { sido: '경상북도', livestock: 'dairy_cattle', count: 1 },
+    { sido: '충청북도', livestock: 'beef_cattle', count: 1 },
+    { sido: '충청북도', livestock: 'pig', count: 1 },
+    { sido: '충청북도', livestock: 'dairy_cattle', count: 1 },
+    { sido: '세종특별자치시', livestock: 'pig', count: 3 },
+    { sido: '강원특별자치도', livestock: 'pig', count: 1 },
+    { sido: '울산광역시', livestock: 'pig', count: 1 },
+    { sido: '제주특별자치도', livestock: 'pig', count: 7 },
+    { sido: '제주특별자치도', livestock: 'dairy_cattle', count: 2 },
   ];
 
-  // 지역별 농장 수 분배 (축산 밀집 지역 가중치)
-  const regionWeights: Record<string, number> = {
-    '경기도': 45,
-    '경상북도': 50,
-    '경상남도': 40,
-    '충청남도': 35,
-    '전라남도': 35,
-    '전라북도': 30,
-    '충청북도': 25,
-    '강원도': 25,
-    '제주특별자치도': 15,
-    '광주광역시': 8,
-    '대전광역시': 7,
-    '대구광역시': 7,
-    '부산광역시': 5,
-    '울산광역시': 5,
-    '인천광역시': 4,
-    '세종특별자치시': 2,
-    '서울특별시': 1,
-  };
+  let farmIdCounter = 1;
 
-  const regionList: string[] = [];
-  for (const [region, weight] of Object.entries(regionWeights)) {
-    for (let i = 0; i < weight; i++) {
-      regionList.push(region);
-    }
-  }
-
-  const shuffledLivestock = random.shuffle(livestockDistribution);
-
-  for (let i = 0; i < 339; i++) {
-    const sido = random.pick(regionList);
+  for (const { sido, livestock, count } of farmDistribution) {
     const bounds = REGION_BOUNDS[sido];
-    const livestock = shuffledLivestock[i];
+
+    for (let j = 0; j < count; j++) {
+      const i = farmIdCounter - 1;
 
     // 규모별 사육두수 범위
     const sizes: FarmSize[] = ['small', 'medium', 'large'];
@@ -167,40 +169,45 @@ export function generateFarms(): Farm[] {
       pig: { CH4: 20, CO2: 15, N2O: 0.3, NH3: 8 },
     };
 
-    const farm: Farm = {
-      id: `farm-${i + 1}`,
-      name: `${random.pick(FARM_NAME_PREFIXES)}${random.pick(FARM_NAME_SUFFIXES)}`,
-      owner: `${random.pick(OWNER_LAST_NAMES)}${random.pick(OWNER_FIRST_NAMES)}`,
-      location: {
-        coordinates: {
-          lat: bounds.lat[0] + random.next() * (bounds.lat[1] - bounds.lat[0]),
-          lng: bounds.lng[0] + random.next() * (bounds.lng[1] - bounds.lng[0]),
-        },
-        sido,
-        sigungu: '', // 간단히 생략
-        address: `${sido} 어딘가`,
-      },
-      livestock: {
-        type: livestock,
-        headCount,
-      },
-      size,
-      certification: {
-        grade,
-        certifiedDate: `202${random.nextInt(2, 4)}-${String(random.nextInt(1, 12)).padStart(2, '0')}-${String(random.nextInt(1, 28)).padStart(2, '0')}`,
-        expiryDate: `202${random.nextInt(5, 7)}-${String(random.nextInt(1, 12)).padStart(2, '0')}-${String(random.nextInt(1, 28)).padStart(2, '0')}`,
-      },
-      sensors: sensorIds,
-      createdAt: `202${random.nextInt(1, 3)}-${String(random.nextInt(1, 12)).padStart(2, '0')}-${String(random.nextInt(1, 28)).padStart(2, '0')}`,
-      monthlyTarget: {
-        CH4: Math.round(baseTargets[livestock].CH4 * headCount * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)),
-        CO2: Math.round(baseTargets[livestock].CO2 * headCount * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)),
-        N2O: Math.round(baseTargets[livestock].N2O * headCount * 100 * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)) / 100,
-        NH3: Math.round(baseTargets[livestock].NH3 * headCount * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)),
-      },
-    };
+      const sigunguList = SIGUNGU_BY_SIDO[sido];
+      const sigungu = random.pick(sigunguList);
 
-    farms.push(farm);
+      const farm: Farm = {
+        id: `farm-${farmIdCounter}`,
+        name: `${random.pick(FARM_NAME_PREFIXES)}${random.pick(FARM_NAME_SUFFIXES)}`,
+        owner: `${random.pick(OWNER_LAST_NAMES)}${random.pick(OWNER_FIRST_NAMES)}`,
+        location: {
+          coordinates: {
+            lat: bounds.lat[0] + random.next() * (bounds.lat[1] - bounds.lat[0]),
+            lng: bounds.lng[0] + random.next() * (bounds.lng[1] - bounds.lng[0]),
+          },
+          sido,
+          sigungu,
+          address: `${sido} ${sigungu} ${random.pick(['읍', '면', '동'])} ${random.nextInt(1, 999)}`,
+        },
+        livestock: {
+          type: livestock,
+          headCount,
+        },
+        size,
+        certification: {
+          grade,
+          certifiedDate: `202${random.nextInt(2, 4)}-${String(random.nextInt(1, 12)).padStart(2, '0')}-${String(random.nextInt(1, 28)).padStart(2, '0')}`,
+          expiryDate: `202${random.nextInt(5, 7)}-${String(random.nextInt(1, 12)).padStart(2, '0')}-${String(random.nextInt(1, 28)).padStart(2, '0')}`,
+        },
+        sensors: sensorIds,
+        createdAt: `202${random.nextInt(1, 3)}-${String(random.nextInt(1, 12)).padStart(2, '0')}-${String(random.nextInt(1, 28)).padStart(2, '0')}`,
+        monthlyTarget: {
+          CH4: Math.round(baseTargets[livestock].CH4 * headCount * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)),
+          CO2: Math.round(baseTargets[livestock].CO2 * headCount * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)),
+          N2O: Math.round(baseTargets[livestock].N2O * headCount * 100 * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)) / 100,
+          NH3: Math.round(baseTargets[livestock].NH3 * headCount * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)),
+        },
+      };
+
+      farms.push(farm);
+      farmIdCounter++;
+    }
   }
 
   return farms;
@@ -214,6 +221,12 @@ export function generateSensors(farms: Farm[]): Sensor[] {
   const zones = ['축사 A동', '축사 B동', '분뇨처리장', '사료창고', '외부'];
 
   for (const farm of farms) {
+    const sensorCount = farm.sensors.length;
+
+    // 농장 크기에 따른 격자 배치
+    // 농장 건물 영역: x: 50-350 (12.5%-87.5%), y: 50-250 (16.67%-83.33%)
+    const gridPositions = calculateGridPositions(sensorCount);
+
     for (let i = 0; i < farm.sensors.length; i++) {
       const sensorId = farm.sensors[i];
       const zone = zones[i % zones.length];
@@ -227,8 +240,8 @@ export function generateSensors(farms: Farm[]): Sensor[] {
         farmId: farm.id,
         type: 'gas',
         location: {
-          x: 10 + random.next() * 80,
-          y: 10 + random.next() * 80,
+          x: gridPositions[i].x,
+          y: gridPositions[i].y,
           zone,
         },
         status,
@@ -248,6 +261,51 @@ export function generateSensors(farms: Farm[]): Sensor[] {
   }
 
   return sensors;
+}
+
+// 센서 개수에 따라 격자 형태로 위치 계산 (농장 건물 내부)
+function calculateGridPositions(count: number): Array<{ x: number; y: number }> {
+  const positions: Array<{ x: number; y: number }> = [];
+
+  // 농장 건물 영역 (viewBox 400x300 기준, 건물은 50,50에서 350,250까지)
+  const buildingBounds = {
+    xMin: 12.5,  // 50/400 * 100
+    xMax: 87.5,  // 350/400 * 100
+    yMin: 16.67, // 50/300 * 100
+    yMax: 83.33, // 250/300 * 100
+  };
+
+  // 센서 개수에 따른 격자 구성
+  // 3개: 1x3, 5개: 2x3, 8개: 3x3
+  let rows: number, cols: number;
+
+  if (count <= 3) {
+    rows = 1;
+    cols = count;
+  } else if (count <= 6) {
+    rows = 2;
+    cols = Math.ceil(count / 2);
+  } else {
+    rows = 3;
+    cols = Math.ceil(count / 3);
+  }
+
+  // 격자 간격 계산
+  const xStep = (buildingBounds.xMax - buildingBounds.xMin) / (cols + 1);
+  const yStep = (buildingBounds.yMax - buildingBounds.yMin) / (rows + 1);
+
+  // 격자 위치 생성
+  for (let i = 0; i < count; i++) {
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+
+    positions.push({
+      x: buildingBounds.xMin + (col + 1) * xStep,
+      y: buildingBounds.yMin + (row + 1) * yStep,
+    });
+  }
+
+  return positions;
 }
 
 // 실시간 배출 데이터 생성 (시뮬레이션)
