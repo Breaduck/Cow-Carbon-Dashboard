@@ -127,6 +127,17 @@ export const useStore = create<AppState>((set, get) => ({
 
 // 필터 헬퍼 함수
 function filterFarms(farms: Farm[], filters: FilterState): Farm[] {
+  // 모든 필터가 비어있으면 빈 배열 반환 (아무것도 선택 안 했을 때)
+  const hasAnyFilter = filters.livestock.length > 0 ||
+                       filters.grade.length > 0 ||
+                       filters.size.length > 0 ||
+                       filters.sido.length > 0 ||
+                       filters.searchQuery.length > 0;
+
+  if (!hasAnyFilter) {
+    return [];
+  }
+
   return farms.filter(farm => {
     // 축종 필터 (비어있으면 모든 축종 허용)
     if (filters.livestock.length > 0 && !filters.livestock.includes(farm.livestock.type)) {

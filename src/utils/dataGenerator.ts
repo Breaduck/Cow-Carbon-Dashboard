@@ -218,18 +218,15 @@ export function generateSensors(farms: Farm[]): Sensor[] {
   const sensors: Sensor[] = [];
   const random = new SeededRandom(123);
 
-  const zones = ['축사 A동', '축사 B동', '분뇨처리장', '사료창고', '외부'];
-
   for (const farm of farms) {
     const sensorCount = farm.sensors.length;
 
-    // 농장 크기에 따른 격자 배치
-    // 농장 건물 영역: x: 50-350 (12.5%-87.5%), y: 50-250 (16.67%-83.33%)
-    const gridPositions = calculateGridPositions(sensorCount);
+    // 농장 크기에 따른 구역별 센서 배치
+    const sensorPositions = calculateZoneBasedPositions(sensorCount);
 
     for (let i = 0; i < farm.sensors.length; i++) {
       const sensorId = farm.sensors[i];
-      const zone = zones[i % zones.length];
+      const { x, y, zone } = sensorPositions[i];
 
       // 상태 (대부분 active)
       const statusRoll = random.next();
@@ -240,8 +237,8 @@ export function generateSensors(farms: Farm[]): Sensor[] {
         farmId: farm.id,
         type: 'gas',
         location: {
-          x: gridPositions[i].x,
-          y: gridPositions[i].y,
+          x,
+          y,
           zone,
         },
         status,
@@ -263,46 +260,54 @@ export function generateSensors(farms: Farm[]): Sensor[] {
   return sensors;
 }
 
-// 센서 개수에 따라 격자 형태로 위치 계산 (농장 건물 내부)
-function calculateGridPositions(count: number): Array<{ x: number; y: number }> {
-  const positions: Array<{ x: number; y: number }> = [];
-
-  // 농장 건물 영역 (viewBox 400x300 기준, 건물은 50,50에서 350,250까지)
-  const buildingBounds = {
-    xMin: 12.5,  // 50/400 * 100
-    xMax: 87.5,  // 350/400 * 100
-    yMin: 16.67, // 50/300 * 100
-    yMax: 83.33, // 250/300 * 100
+// 구역별 센서 배치 계산 (과학적 배치)
+// ViewBox 400x300 기준, 건물은 50,50에서 350,250까지
+// 4개 구역: A동(좌상), B동(우상), 분뇨처리장(좌하), 사료창고(우하)
+function calculateZoneBasedPositions(count: number): Array<{ x: number; y: number; zone: string }> {
+  // 각 구역의 중심점 (viewBox 좌표를 퍼센트로 변환)
+  const zones = {
+    'A동': { x: 31.25, y: 33.33, label: '축사 A동' },      // (125, 100) -> (31.25%, 33.33%)
+    'B동': { x: 68.75, y: 33.33, label: '축사 B동' },      // (275, 100) -> (68.75%, 33.33%)
+    '분뇨처리장': { x: 31.25, y: 66.67, label: '분뇨처리장' }, // (125, 200) -> (31.25%, 66.67%)
+    '사료창고': { x: 68.75, y: 66.67, label: '사료창고' },   // (275, 200) -> (68.75%, 66.67%)
   };
 
-  // 센서 개수에 따른 격자 구성
-  // 3개: 1x3, 5개: 2x3, 8개: 3x3
-  let rows: number, cols: number;
+  const positions: Array<{ x: number; y: number; zone: string }> = [];
 
-  if (count <= 3) {
-    rows = 1;
-    cols = count;
-  } else if (count <= 6) {
-    rows = 2;
-    cols = Math.ceil(count / 2);
+  if (count === 3) {
+    // 소규모: A동, B동, 분뇨처리장 (가장 중요한 배출원)
+    positions.push(
+      { x: zones['A동'].x, y: zones['A동'].y, zone: zones['A동'].label },
+      { x: zones['B동'].x, y: zones['B동'].y, zone: zones['B동'].label },
+      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y, zone: zones['분뇨처리장'].label }
+    );
+  } else if (count === 5) {
+    // 중규모: 각 주요 구역 + A동 추가 1개
+    positions.push(
+      { x: zones['A동'].x - 6, y: zones['A동'].y - 5, zone: zones['A동'].label },
+      { x: zones['A동'].x + 6, y: zones['A동'].y + 5, zone: zones['A동'].label },
+      { x: zones['B동'].x, y: zones['B동'].y, zone: zones['B동'].label },
+      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y, zone: zones['분뇨처리장'].label },
+      { x: zones['사료창고'].x, y: zones['사료창고'].y, zone: zones['사료창고'].label }
+    );
   } else {
-    rows = 3;
-    cols = Math.ceil(count / 3);
-  }
+    // 대규모 (8개): 각 구역에 2개씩
+    const offset = 7; // 중심에서 떨어진 거리 (%)
 
-  // 격자 간격 계산
-  const xStep = (buildingBounds.xMax - buildingBounds.xMin) / (cols + 1);
-  const yStep = (buildingBounds.yMax - buildingBounds.yMin) / (rows + 1);
-
-  // 격자 위치 생성
-  for (let i = 0; i < count; i++) {
-    const row = Math.floor(i / cols);
-    const col = i % cols;
-
-    positions.push({
-      x: buildingBounds.xMin + (col + 1) * xStep,
-      y: buildingBounds.yMin + (row + 1) * yStep,
-    });
+    positions.push(
+      // A동 2개
+      { x: zones['A동'].x - offset, y: zones['A동'].y - offset, zone: zones['A동'].label },
+      { x: zones['A동'].x + offset, y: zones['A동'].y + offset, zone: zones['A동'].label },
+      // B동 2개
+      { x: zones['B동'].x - offset, y: zones['B동'].y - offset, zone: zones['B동'].label },
+      { x: zones['B동'].x + offset, y: zones['B동'].y + offset, zone: zones['B동'].label },
+      // 분뇨처리장 2개
+      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y - offset, zone: zones['분뇨처리장'].label },
+      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y + offset, zone: zones['분뇨처리장'].label },
+      // 사료창고 2개
+      { x: zones['사료창고'].x - offset, y: zones['사료창고'].y - offset, zone: zones['사료창고'].label },
+      { x: zones['사료창고'].x + offset, y: zones['사료창고'].y + offset, zone: zones['사료창고'].label }
+    );
   }
 
   return positions;
