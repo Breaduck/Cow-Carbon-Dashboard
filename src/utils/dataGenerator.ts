@@ -153,8 +153,8 @@ export function generateFarms(): Farm[] {
     const [minHead, maxHead] = headCountRanges[livestock][size];
     const headCount = random.nextInt(minHead, maxHead);
 
-    // 센서 개수 (규모에 따라)
-    const sensorCounts: Record<FarmSize, number> = { small: 3, medium: 5, large: 8 };
+    // 센서 개수 (규모에 따라 - 과학적 측정을 위한 충분한 개수)
+    const sensorCounts: Record<FarmSize, number> = { small: 5, medium: 8, large: 12 };
     const sensorCount = sensorCounts[size];
     const sensorIds = Array.from({ length: sensorCount }, (_, j) => `sensor-${i + 1}-${j + 1}`);
 
@@ -273,39 +273,55 @@ function calculateZoneBasedPositions(count: number): Array<{ x: number; y: numbe
   };
 
   const positions: Array<{ x: number; y: number; zone: string }> = [];
+  const offset = 7; // 중심에서 떨어진 거리 (%)
 
-  if (count === 3) {
-    // 소규모: A동, B동, 분뇨처리장 (가장 중요한 배출원)
+  if (count === 5) {
+    // 소규모 (5개): 각 주요 구역 + A동에 1개 추가 (가축 밀집 구역)
     positions.push(
-      { x: zones['A동'].x, y: zones['A동'].y, zone: zones['A동'].label },
+      // A동 2개 (가축이 많아 중요)
+      { x: zones['A동'].x - 6, y: zones['A동'].y, zone: zones['A동'].label },
+      { x: zones['A동'].x + 6, y: zones['A동'].y, zone: zones['A동'].label },
+      // B동 1개
       { x: zones['B동'].x, y: zones['B동'].y, zone: zones['B동'].label },
-      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y, zone: zones['분뇨처리장'].label }
-    );
-  } else if (count === 5) {
-    // 중규모: 각 주요 구역 + A동 추가 1개
-    positions.push(
-      { x: zones['A동'].x - 6, y: zones['A동'].y - 5, zone: zones['A동'].label },
-      { x: zones['A동'].x + 6, y: zones['A동'].y + 5, zone: zones['A동'].label },
-      { x: zones['B동'].x, y: zones['B동'].y, zone: zones['B동'].label },
+      // 분뇨처리장 1개 (메탄 발생원)
       { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y, zone: zones['분뇨처리장'].label },
+      // 사료창고 1개
       { x: zones['사료창고'].x, y: zones['사료창고'].y, zone: zones['사료창고'].label }
     );
-  } else {
-    // 대규모 (8개): 각 구역에 2개씩
-    const offset = 7; // 중심에서 떨어진 거리 (%)
-
+  } else if (count === 8) {
+    // 중규모 (8개): 각 구역에 2개씩 균등 배치
     positions.push(
       // A동 2개
-      { x: zones['A동'].x - offset, y: zones['A동'].y - offset, zone: zones['A동'].label },
-      { x: zones['A동'].x + offset, y: zones['A동'].y + offset, zone: zones['A동'].label },
+      { x: zones['A동'].x - offset, y: zones['A동'].y - 4, zone: zones['A동'].label },
+      { x: zones['A동'].x + offset, y: zones['A동'].y + 4, zone: zones['A동'].label },
       // B동 2개
-      { x: zones['B동'].x - offset, y: zones['B동'].y - offset, zone: zones['B동'].label },
-      { x: zones['B동'].x + offset, y: zones['B동'].y + offset, zone: zones['B동'].label },
+      { x: zones['B동'].x - offset, y: zones['B동'].y - 4, zone: zones['B동'].label },
+      { x: zones['B동'].x + offset, y: zones['B동'].y + 4, zone: zones['B동'].label },
       // 분뇨처리장 2개
-      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y - offset, zone: zones['분뇨처리장'].label },
-      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y + offset, zone: zones['분뇨처리장'].label },
+      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y - 4, zone: zones['분뇨처리장'].label },
+      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y + 4, zone: zones['분뇨처리장'].label },
       // 사료창고 2개
-      { x: zones['사료창고'].x - offset, y: zones['사료창고'].y - offset, zone: zones['사료창고'].label },
+      { x: zones['사료창고'].x - offset, y: zones['사료창고'].y - 4, zone: zones['사료창고'].label },
+      { x: zones['사료창고'].x + offset, y: zones['사료창고'].y + 4, zone: zones['사료창고'].label }
+    );
+  } else {
+    // 대규모 (12개): 각 구역에 3개씩 집중 배치
+    positions.push(
+      // A동 3개
+      { x: zones['A동'].x, y: zones['A동'].y - offset, zone: zones['A동'].label },
+      { x: zones['A동'].x - offset, y: zones['A동'].y + 4, zone: zones['A동'].label },
+      { x: zones['A동'].x + offset, y: zones['A동'].y + 4, zone: zones['A동'].label },
+      // B동 3개
+      { x: zones['B동'].x, y: zones['B동'].y - offset, zone: zones['B동'].label },
+      { x: zones['B동'].x - offset, y: zones['B동'].y + 4, zone: zones['B동'].label },
+      { x: zones['B동'].x + offset, y: zones['B동'].y + 4, zone: zones['B동'].label },
+      // 분뇨처리장 3개
+      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y - 4, zone: zones['분뇨처리장'].label },
+      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y + offset, zone: zones['분뇨처리장'].label },
+      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y + offset, zone: zones['분뇨처리장'].label },
+      // 사료창고 3개
+      { x: zones['사료창고'].x, y: zones['사료창고'].y - 4, zone: zones['사료창고'].label },
+      { x: zones['사료창고'].x - offset, y: zones['사료창고'].y + offset, zone: zones['사료창고'].label },
       { x: zones['사료창고'].x + offset, y: zones['사료창고'].y + offset, zone: zones['사료창고'].label }
     );
   }
