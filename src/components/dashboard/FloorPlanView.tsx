@@ -9,9 +9,13 @@ interface FloorPlanViewProps {
 export function FloorPlanView({ farm }: FloorPlanViewProps) {
   const sensors = getSensorsByFarmId(farm.id);
 
+  // 내부/외부 센서 분류
+  const indoorSensors = sensors.filter(s => !s.location.zone.includes('외부'));
+  const outdoorSensors = sensors.filter(s => s.location.zone.includes('외부'));
+
   return (
-    <Card title="센서 배치도" padding="lg">
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden border border-gray-200">
+    <Card title="센서 배치도 (내부 + 외부 기준선)" padding="lg">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl overflow-hidden border border-gray-200">
         {/* 축사 구조 */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
           {/* 메인 건물 */}
@@ -26,13 +30,15 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
           <text x="275" y="100" textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="500">B동</text>
           <text x="125" y="200" textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="500">분뇨처리장</text>
           <text x="275" y="200" textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="500">사료창고</text>
+
+          {/* 외곽 표시 (농장 경계) */}
+          <rect x="10" y="10" width="380" height="280" fill="none" stroke="#94a3b8" strokeWidth="1" strokeDasharray="5,5" rx="4"/>
         </svg>
 
-        {/* 센서 위치 */}
-        {sensors.map((sensor, idx) => {
+        {/* 내부 센서 위치 */}
+        {indoorSensors.map((sensor, idx) => {
           const x = sensor.location.x;
           const y = sensor.location.y;
-          const isActive = sensor.status === 'active';
 
           return (
             <div
@@ -40,13 +46,37 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
               className="absolute group"
               style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
             >
-              {/* 센서 마커 */}
-              <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'} ring-4 ring-white shadow-lg`} />
+              {/* 내부 센서 마커 (녹색) */}
+              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse ring-4 ring-white shadow-lg" />
 
               {/* 툴팁 */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                 <div className="bg-gray-900 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap shadow-xl">
-                  센서 {idx + 1} · {sensor.location.zone}
+                  내부 센서 · {sensor.location.zone}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* 외부 기준선 센서 위치 */}
+        {outdoorSensors.map((sensor, idx) => {
+          const x = sensor.location.x;
+          const y = sensor.location.y;
+
+          return (
+            <div
+              key={sensor.id}
+              className="absolute group"
+              style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+            >
+              {/* 외부 센서 마커 (파란색) */}
+              <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse ring-4 ring-white shadow-lg" />
+
+              {/* 툴팁 */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                <div className="bg-blue-900 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap shadow-xl">
+                  {sensor.location.zone}
                 </div>
               </div>
             </div>
@@ -58,11 +88,11 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-gray-600">정상 {sensors.filter(s => s.status === 'active').length}개</span>
+            <span className="text-gray-600">내부 {indoorSensors.length}개</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-gray-400" />
-            <span className="text-gray-600">비활성 {sensors.filter(s => s.status !== 'active').length}개</span>
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <span className="text-gray-600">외부 기준선 {outdoorSensors.length}개</span>
           </div>
         </div>
         <span className="text-gray-500">총 {sensors.length}개 센서</span>

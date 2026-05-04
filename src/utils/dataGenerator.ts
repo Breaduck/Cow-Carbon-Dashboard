@@ -233,9 +233,8 @@ export function generateSensors(farms: Farm[]): Sensor[] {
       const sensorId = farm.sensors[i];
       const { x, y, zone, isOutdoor } = sensorPositions[i];
 
-      // 상태 (대부분 active)
-      const statusRoll = random.next();
-      const status = statusRoll < 0.9 ? 'active' : statusRoll < 0.97 ? 'inactive' : 'error';
+      // 모든 센서 활성 상태 (실시간 모니터링 시스템)
+      const status = 'active';
 
       // 외부 기준선 센서는 대기 배경 농도 (낮음)
       const baseValues = isOutdoor ? {
