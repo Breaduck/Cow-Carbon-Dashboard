@@ -154,11 +154,11 @@ export function generateFarms(): Farm[] {
     const headCount = random.nextInt(minHead, maxHead);
 
     // 센서 개수 (규모에 따라 - 배출량 측정 필수 구성)
-    // 내부 센서 + 외부 기준선 센서
+    // 내부 센서(주요 배출원) + 외부 기준선 4방향
     const sensorCounts: Record<FarmSize, number> = {
-      small: 7,   // 5(내부) + 2(외부 기준선)
-      medium: 11,  // 8(내부) + 3(외부 기준선)
-      large: 16    // 12(내부) + 4(외부 기준선)
+      small: 9,   // 5(내부: A동2 B동1 분뇨2) + 4(외부 동서남북)
+      medium: 12,  // 8(내부: A동3 B동3 분뇨2) + 4(외부)
+      large: 16    // 12(내부: A동4 B동4 분뇨4) + 4(외부)
     };
     const sensorCount = sensorCounts[size];
     const sensorIds = Array.from({ length: sensorCount }, (_, j) => `sensor-${i + 1}-${j + 1}`);
@@ -287,58 +287,56 @@ function calculateEmissionMeasurementPositions(size: FarmSize): Array<{ x: numbe
   const positions: Array<{ x: number; y: number; zone: string; isOutdoor: boolean }> = [];
   const offset = 7;
 
-  // 1. 내부 센서 배치
+  // 1. 내부 센서 배치 (주요 배출원: A동, B동, 분뇨처리장)
   if (size === 'small') {
-    // 소규모 (5개 내부): 각 주요 구역 + A동 추가
+    // 소규모 (5개 내부): A동2, B동1, 분뇨2
     positions.push(
       { x: zones['A동'].x - 6, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
       { x: zones['A동'].x + 6, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
       { x: zones['B동'].x, y: zones['B동'].y, zone: '축사 B동', isOutdoor: false },
-      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['사료창고'].x, y: zones['사료창고'].y, zone: '사료창고', isOutdoor: false }
+      { x: zones['분뇨처리장'].x - 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
+      { x: zones['분뇨처리장'].x + 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false }
     );
   } else if (size === 'medium') {
-    // 중규모 (8개 내부): 각 구역에 2개씩
+    // 중규모 (8개 내부): A동3, B동3, 분뇨2
     positions.push(
-      { x: zones['A동'].x - offset, y: zones['A동'].y - 4, zone: '축사 A동', isOutdoor: false },
-      { x: zones['A동'].x + offset, y: zones['A동'].y + 4, zone: '축사 A동', isOutdoor: false },
-      { x: zones['B동'].x - offset, y: zones['B동'].y - 4, zone: '축사 B동', isOutdoor: false },
-      { x: zones['B동'].x + offset, y: zones['B동'].y + 4, zone: '축사 B동', isOutdoor: false },
-      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y - 4, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y + 4, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['사료창고'].x - offset, y: zones['사료창고'].y - 4, zone: '사료창고', isOutdoor: false },
-      { x: zones['사료창고'].x + offset, y: zones['사료창고'].y + 4, zone: '사료창고', isOutdoor: false }
-    );
-  } else {
-    // 대규모 (12개 내부): 각 구역에 3개씩
-    positions.push(
-      { x: zones['A동'].x, y: zones['A동'].y - offset, zone: '축사 A동', isOutdoor: false },
+      { x: zones['A동'].x, y: zones['A동'].y - 5, zone: '축사 A동', isOutdoor: false },
       { x: zones['A동'].x - offset, y: zones['A동'].y + 4, zone: '축사 A동', isOutdoor: false },
       { x: zones['A동'].x + offset, y: zones['A동'].y + 4, zone: '축사 A동', isOutdoor: false },
-      { x: zones['B동'].x, y: zones['B동'].y - offset, zone: '축사 B동', isOutdoor: false },
+      { x: zones['B동'].x, y: zones['B동'].y - 5, zone: '축사 B동', isOutdoor: false },
       { x: zones['B동'].x - offset, y: zones['B동'].y + 4, zone: '축사 B동', isOutdoor: false },
       { x: zones['B동'].x + offset, y: zones['B동'].y + 4, zone: '축사 B동', isOutdoor: false },
-      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y - 4, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y + offset, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y + offset, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['사료창고'].x, y: zones['사료창고'].y - 4, zone: '사료창고', isOutdoor: false },
-      { x: zones['사료창고'].x - offset, y: zones['사료창고'].y + offset, zone: '사료창고', isOutdoor: false },
-      { x: zones['사료창고'].x + offset, y: zones['사료창고'].y + offset, zone: '사료창고', isOutdoor: false }
+      { x: zones['분뇨처리장'].x - 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
+      { x: zones['분뇨처리장'].x + 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false }
+    );
+  } else {
+    // 대규모 (12개 내부): A동4, B동4, 분뇨4
+    positions.push(
+      { x: zones['A동'].x, y: zones['A동'].y - offset, zone: '축사 A동', isOutdoor: false },
+      { x: zones['A동'].x - offset, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
+      { x: zones['A동'].x + offset, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
+      { x: zones['A동'].x, y: zones['A동'].y + offset, zone: '축사 A동', isOutdoor: false },
+      { x: zones['B동'].x, y: zones['B동'].y - offset, zone: '축사 B동', isOutdoor: false },
+      { x: zones['B동'].x - offset, y: zones['B동'].y, zone: '축사 B동', isOutdoor: false },
+      { x: zones['B동'].x + offset, y: zones['B동'].y, zone: '축사 B동', isOutdoor: false },
+      { x: zones['B동'].x, y: zones['B동'].y + offset, zone: '축사 B동', isOutdoor: false },
+      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y - offset, zone: '분뇨처리장', isOutdoor: false },
+      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
+      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
+      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y + offset, zone: '분뇨처리장', isOutdoor: false }
     );
   }
 
-  // 2. 외부 기준선 센서 배치 (건물 바깥, 대기 측정용)
-  const outdoorCount = size === 'small' ? 2 : size === 'medium' ? 3 : 4;
-
-  // 외부 센서는 농장 주변에 배치 (건물 외곽)
+  // 2. 외부 기준선 센서 배치 (모든 규모 동서남북 4개 고정)
+  // 바람은 사방에서 불 수 있으므로 4방향 측정 필수
   const outdoorPositions = [
-    { x: 5, y: 50, zone: '외부 기준선 (서)', isOutdoor: true },      // 왼쪽
-    { x: 95, y: 50, zone: '외부 기준선 (동)', isOutdoor: true },     // 오른쪽
-    { x: 50, y: 5, zone: '외부 기준선 (북)', isOutdoor: true },      // 위쪽
-    { x: 50, y: 95, zone: '외부 기준선 (남)', isOutdoor: true },     // 아래쪽
+    { x: 5, y: 50, zone: '외부 기준선 (서)', isOutdoor: true },
+    { x: 95, y: 50, zone: '외부 기준선 (동)', isOutdoor: true },
+    { x: 50, y: 5, zone: '외부 기준선 (북)', isOutdoor: true },
+    { x: 50, y: 95, zone: '외부 기준선 (남)', isOutdoor: true },
   ];
 
-  positions.push(...outdoorPositions.slice(0, outdoorCount));
+  positions.push(...outdoorPositions);
 
   return positions;
 }

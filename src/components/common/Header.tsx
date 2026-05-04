@@ -1,13 +1,21 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { unreadAlertCount, toggleSidebar, alerts, markAlertAsRead } = useStore();
   const [showAlerts, setShowAlerts] = useState(false);
 
   const recentAlerts = alerts.filter(a => !a.isResolved).slice(0, 5);
+
+  const handleAlertClick = (alert: typeof alerts[0]) => {
+    markAlertAsRead(alert.id);
+    setShowAlerts(false);
+    // 해당 농장 대시보드로 이동
+    navigate(`/dashboard/${alert.farmId}`);
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
@@ -92,8 +100,8 @@ export function Header() {
                   recentAlerts.map(alert => (
                     <div
                       key={alert.id}
-                      onClick={() => markAlertAsRead(alert.id)}
-                      className={`px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 ${
+                      onClick={() => handleAlertClick(alert)}
+                      className={`px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors ${
                         !alert.isRead ? 'bg-blue-50' : ''
                       }`}
                     >
@@ -107,7 +115,7 @@ export function Header() {
                           }`}
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 truncate">{alert.message}</p>
+                          <p className="text-sm text-gray-900 font-medium">{alert.message}</p>
                           <p className="text-xs text-gray-500 mt-1">
                             {new Date(alert.timestamp).toLocaleString('ko-KR')}
                           </p>
