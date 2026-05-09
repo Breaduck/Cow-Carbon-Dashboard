@@ -331,21 +331,27 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
             {suggestions.map((suggestion, idx) => {
               const severityStyles = {
                 high: {
-                  bg: 'bg-white',
-                  border: 'border-red-200',
-                  badge: 'bg-red-50 text-red-700',
-                  text: 'text-gray-900',
+                  bg: 'bg-red-50',
+                  border: 'border-red-500',
+                  shadow: 'shadow-lg shadow-red-200',
+                  animation: 'pulse-slow 3s ease-in-out infinite',
+                  badge: 'bg-red-100 text-red-800',
+                  text: 'text-red-900',
                 },
                 medium: {
-                  bg: 'bg-white',
-                  border: 'border-orange-200',
-                  badge: 'bg-orange-50 text-orange-700',
-                  text: 'text-gray-900',
+                  bg: 'bg-yellow-50',
+                  border: 'border-yellow-500',
+                  shadow: 'shadow-lg shadow-yellow-200',
+                  animation: 'pulse-slow 4s ease-in-out infinite',
+                  badge: 'bg-yellow-100 text-yellow-800',
+                  text: 'text-yellow-900',
                 },
                 low: {
-                  bg: 'bg-white',
-                  border: 'border-gray-200',
-                  badge: 'bg-gray-100 text-gray-700',
+                  bg: 'bg-gray-50',
+                  border: 'border-gray-300',
+                  shadow: '',
+                  animation: '',
+                  badge: 'bg-gray-200 text-gray-700',
                   text: 'text-gray-900',
                 },
               };
@@ -362,7 +368,10 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                 <button
                   key={idx}
                   onClick={() => setSelectedSuggestion(suggestion)}
-                  className={`p-6 rounded-2xl border-2 ${style.border} ${style.bg} hover:shadow-lg hover:scale-[1.02] transition-all text-left cursor-pointer relative`}
+                  className={`p-6 rounded-2xl border-2 ${style.border} ${style.bg} ${style.shadow} hover:shadow-lg hover:scale-[1.02] transition-all text-left cursor-pointer relative`}
+                  style={{
+                    animation: style.animation
+                  }}
                 >
                   {/* 심각도 배지 */}
                   <div className="mb-4">
