@@ -97,36 +97,36 @@ const OWNER_FIRST_NAMES = [
   '영희', '정희', '미영', '수진', '지연', '민정', '혜진', '유진',
 ];
 
-// 339개 농장 생성
+// 600개 농장 생성 (2023~2025년 누적 데이터)
 export function generateFarms(): Farm[] {
   const farms: Farm[] = [];
   const random = new SeededRandom(42);
 
-  // 2025년 실제 시도별, 축종별 인증 농장 현황
+  // 2023~2025년 시도별, 축종별 인증 농장 현황 (누적)
   const farmDistribution: Array<{ sido: string; livestock: LivestockType; count: number }> = [
-    { sido: '경기도', livestock: 'beef_cattle', count: 7 },
-    { sido: '경기도', livestock: 'pig', count: 12 },
-    { sido: '경기도', livestock: 'dairy_cattle', count: 98 },
-    { sido: '충청남도', livestock: 'beef_cattle', count: 1 },
-    { sido: '충청남도', livestock: 'pig', count: 40 },
-    { sido: '충청남도', livestock: 'dairy_cattle', count: 3 },
-    { sido: '전라남도', livestock: 'beef_cattle', count: 21 },
-    { sido: '전라남도', livestock: 'pig', count: 64 },
-    { sido: '전라남도', livestock: 'dairy_cattle', count: 4 },
-    { sido: '경상남도', livestock: 'pig', count: 39 },
-    { sido: '전북특별자치도', livestock: 'beef_cattle', count: 12 },
-    { sido: '전북특별자치도', livestock: 'pig', count: 12 },
-    { sido: '전북특별자치도', livestock: 'dairy_cattle', count: 1 },
-    { sido: '경상북도', livestock: 'pig', count: 7 },
-    { sido: '경상북도', livestock: 'dairy_cattle', count: 1 },
-    { sido: '충청북도', livestock: 'beef_cattle', count: 1 },
-    { sido: '충청북도', livestock: 'pig', count: 1 },
-    { sido: '충청북도', livestock: 'dairy_cattle', count: 1 },
-    { sido: '세종특별자치시', livestock: 'pig', count: 3 },
-    { sido: '강원특별자치도', livestock: 'pig', count: 1 },
-    { sido: '울산광역시', livestock: 'pig', count: 1 },
-    { sido: '제주특별자치도', livestock: 'pig', count: 7 },
-    { sido: '제주특별자치도', livestock: 'dairy_cattle', count: 2 },
+    { sido: '경기도', livestock: 'beef_cattle', count: 12 },
+    { sido: '경기도', livestock: 'pig', count: 21 },
+    { sido: '경기도', livestock: 'dairy_cattle', count: 174 },
+    { sido: '충청남도', livestock: 'beef_cattle', count: 2 },
+    { sido: '충청남도', livestock: 'pig', count: 71 },
+    { sido: '충청남도', livestock: 'dairy_cattle', count: 5 },
+    { sido: '전라남도', livestock: 'beef_cattle', count: 37 },
+    { sido: '전라남도', livestock: 'pig', count: 113 },
+    { sido: '전라남도', livestock: 'dairy_cattle', count: 7 },
+    { sido: '경상남도', livestock: 'pig', count: 69 },
+    { sido: '전북특별자치도', livestock: 'beef_cattle', count: 21 },
+    { sido: '전북특별자치도', livestock: 'pig', count: 21 },
+    { sido: '전북특별자치도', livestock: 'dairy_cattle', count: 2 },
+    { sido: '경상북도', livestock: 'pig', count: 12 },
+    { sido: '경상북도', livestock: 'dairy_cattle', count: 2 },
+    { sido: '충청북도', livestock: 'beef_cattle', count: 2 },
+    { sido: '충청북도', livestock: 'pig', count: 2 },
+    { sido: '충청북도', livestock: 'dairy_cattle', count: 2 },
+    { sido: '세종특별자치시', livestock: 'pig', count: 5 },
+    { sido: '강원특별자치도', livestock: 'pig', count: 2 },
+    { sido: '울산광역시', livestock: 'pig', count: 2 },
+    { sido: '제주특별자치도', livestock: 'pig', count: 12 },
+    { sido: '제주특별자치도', livestock: 'dairy_cattle', count: 4 },
   ];
 
   let farmIdCounter = 1;
