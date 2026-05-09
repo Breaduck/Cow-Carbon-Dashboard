@@ -13,6 +13,8 @@ import {
   TimeRange,
   ChartDataPoint,
   SIDO_LIST,
+  LCAData,
+  LCAHistoricalData,
 } from '../types';
 
 // 시드 기반 난수 생성기
@@ -153,14 +155,27 @@ export function generateFarms(): Farm[] {
     const [minHead, maxHead] = headCountRanges[livestock][size];
     const headCount = random.nextInt(minHead, maxHead);
 
-    // 센서 개수 (규모에 따라 - 배출량 측정 필수 구성)
-    // 내부 센서(주요 배출원) + 외부 기준선 4방향
-    const sensorCounts: Record<FarmSize, number> = {
-      small: 9,   // 5(내부: A동2 B동1 분뇨2) + 4(외부 동서남북)
-      medium: 12,  // 8(내부: A동3 B동3 분뇨2) + 4(외부)
-      large: 16    // 12(내부: A동4 B동4 분뇨4) + 4(외부)
+    // 센서 개수 (규모별 최적화)
+    // 한우/젖소: 우사당 2-4개 + 분뇨처리장 2개 + 외부 기준선 4개
+    // 돼지: 돈사당 2개 + 분뇨처리장 2개 + 외부 기준선 4개
+    const sensorCounts: Record<LivestockType, Record<FarmSize, number>> = {
+      beef_cattle: {
+        small: 10,   // 우사1(2) + 우사2(2) + 분뇨(2) + 외부(4)
+        medium: 14,  // 우사1(3) + 우사2(3) + 분뇨(4) + 외부(4)
+        large: 18,   // 우사1(4) + 우사2(4) + 분뇨(6) + 외부(4)
+      },
+      dairy_cattle: {
+        small: 11,   // 착유실(2) + 우사(2) + 송아지사(1) + 분뇨(2) + 외부(4)
+        medium: 15,  // 착유실(3) + 우사(3) + 송아지사(2) + 분뇨(3) + 외부(4)
+        large: 19,   // 착유실(4) + 우사(4) + 송아지사(3) + 분뇨(4) + 외부(4)
+      },
+      pig: {
+        small: 14,   // 분만(2) + 자돈(2) + 육성(2) + 비육1(1) + 비육2(1) + 분뇨(2) + 외부(4)
+        medium: 16,  // 분만(2) + 자돈(2) + 육성(2) + 비육1(2) + 비육2(2) + 분뇨(2) + 외부(4)
+        large: 21,   // 분만(3) + 자돈(3) + 육성(3) + 비육1(3) + 비육2(3) + 분뇨(2) + 외부(4)
+      },
     };
-    const sensorCount = sensorCounts[size];
+    const sensorCount = sensorCounts[livestock][size];
     const sensorIds = Array.from({ length: sensorCount }, (_, j) => `sensor-${i + 1}-${j + 1}`);
 
     // 인증 등급 (무작위, A가 가장 많음)
@@ -176,6 +191,18 @@ export function generateFarms(): Farm[] {
 
       const sigunguList = SIGUNGU_BY_SIDO[sido];
       const sigungu = random.pick(sigunguList);
+
+      // LCA 데이터 생성
+      const lcaData = generateLCAData(livestock, headCount, size, random);
+      const lcaHistory = generateHistoricalLCAData(lcaData, random);
+
+      // 도체중 계산 (축종별 평균 도체중)
+      const avgCarcassWeightPerHead: Record<LivestockType, number> = {
+        beef_cattle: 350,  // 한우 평균 도체중 350kg
+        dairy_cattle: 300,  // 젖소 평균 도체중 300kg
+        pig: 85,            // 돼지 평균 도체중 85kg
+      };
+      const carcassWeight = Math.round(avgCarcassWeightPerHead[livestock] * headCount);
 
       const farm: Farm = {
         id: `farm-${farmIdCounter}`,
@@ -208,6 +235,9 @@ export function generateFarms(): Farm[] {
           N2O: Math.round(baseTargets[livestock].N2O * headCount * 100 * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)) / 100,
           NH3: Math.round(baseTargets[livestock].NH3 * headCount * (grade === 'A' ? 0.8 : grade === 'B' ? 0.9 : 1.0)),
         },
+        lcaData,
+        lcaHistory,
+        carcassWeight,
       };
 
       farms.push(farm);
@@ -226,10 +256,15 @@ export function generateSensors(farms: Farm[]): Sensor[] {
   for (const farm of farms) {
     const sensorCount = farm.sensors.length;
 
-    // 농장 크기에 따른 센서 배치 (내부 + 외부 기준선)
-    const sensorPositions = calculateEmissionMeasurementPositions(farm.size);
+    // 농장 크기와 축종에 따른 센서 배치 (실제 건물 내부 + 외부 기준선)
+    const sensorPositions = calculateEmissionMeasurementPositions(farm.livestock.type, farm.size);
 
-    for (let i = 0; i < farm.sensors.length; i++) {
+    // 센서 개수 검증
+    if (sensorPositions.length !== farm.sensors.length) {
+      console.error(`센서 개수 불일치: ${farm.id}, 예상=${farm.sensors.length}, 실제=${sensorPositions.length}, 축종=${farm.livestock.type}, 규모=${farm.size}`);
+    }
+
+    for (let i = 0; i < Math.min(farm.sensors.length, sensorPositions.length); i++) {
       const sensorId = farm.sensors[i];
       const { x, y, zone, isOutdoor } = sensorPositions[i];
 
@@ -272,68 +307,307 @@ export function generateSensors(farms: Farm[]): Sensor[] {
   return sensors;
 }
 
-// 배출량 측정을 위한 센서 배치 계산 (내부 + 외부 기준선)
-// ViewBox 400x300 기준, 건물은 50,50에서 350,250까지
-// 4개 구역: A동(좌상), B동(우상), 분뇨처리장(좌하), 사료창고(우하)
-function calculateEmissionMeasurementPositions(size: FarmSize): Array<{ x: number; y: number; zone: string; isOutdoor: boolean }> {
-  // 각 구역의 중심점 (viewBox 좌표를 퍼센트로 변환)
-  const zones = {
-    'A동': { x: 31.25, y: 33.33, label: '축사 A동' },
-    'B동': { x: 68.75, y: 33.33, label: '축사 B동' },
-    '분뇨처리장': { x: 31.25, y: 66.67, label: '분뇨처리장' },
-    '사료창고': { x: 68.75, y: 66.67, label: '사료창고' },
+// LCA(전과정평가) 데이터 생성
+function generateLCAData(
+  livestock: LivestockType,
+  headCount: number,
+  size: FarmSize,
+  random: SeededRandom
+): LCAData {
+  // 축종별 배출계수 (kg CO2eq/두/월)
+  const emissionFactors = {
+    beef_cattle: {
+      livestock: 85,    // 가축 직접 배출 (장내발효 CH4)
+      manure: 25,       // 분뇨 배출
+      feedPerHead: 300, // 사료 kg/두/월
+      feedEmission: 0.8, // 사료 배출계수 kg CO2eq/kg
+    },
+    dairy_cattle: {
+      livestock: 110,
+      manure: 35,
+      feedPerHead: 450,
+      feedEmission: 0.9,
+    },
+    pig: {
+      livestock: 15,
+      manure: 8,
+      feedPerHead: 90,
+      feedEmission: 0.7,
+    },
   };
 
-  const positions: Array<{ x: number; y: number; zone: string; isOutdoor: boolean }> = [];
-  const offset = 7;
+  const factor = emissionFactors[livestock];
 
-  // 1. 내부 센서 배치 (주요 배출원: A동, B동, 분뇨처리장)
-  if (size === 'small') {
-    // 소규모 (5개 내부): A동2, B동1, 분뇨2
-    positions.push(
-      { x: zones['A동'].x - 6, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
-      { x: zones['A동'].x + 6, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
-      { x: zones['B동'].x, y: zones['B동'].y, zone: '축사 B동', isOutdoor: false },
-      { x: zones['분뇨처리장'].x - 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x + 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false }
-    );
-  } else if (size === 'medium') {
-    // 중규모 (8개 내부): A동3, B동3, 분뇨2
-    positions.push(
-      { x: zones['A동'].x, y: zones['A동'].y - 5, zone: '축사 A동', isOutdoor: false },
-      { x: zones['A동'].x - offset, y: zones['A동'].y + 4, zone: '축사 A동', isOutdoor: false },
-      { x: zones['A동'].x + offset, y: zones['A동'].y + 4, zone: '축사 A동', isOutdoor: false },
-      { x: zones['B동'].x, y: zones['B동'].y - 5, zone: '축사 B동', isOutdoor: false },
-      { x: zones['B동'].x - offset, y: zones['B동'].y + 4, zone: '축사 B동', isOutdoor: false },
-      { x: zones['B동'].x + offset, y: zones['B동'].y + 4, zone: '축사 B동', isOutdoor: false },
-      { x: zones['분뇨처리장'].x - 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x + 6, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false }
-    );
-  } else {
-    // 대규모 (12개 내부): A동4, B동4, 분뇨4
-    positions.push(
-      { x: zones['A동'].x, y: zones['A동'].y - offset, zone: '축사 A동', isOutdoor: false },
-      { x: zones['A동'].x - offset, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
-      { x: zones['A동'].x + offset, y: zones['A동'].y, zone: '축사 A동', isOutdoor: false },
-      { x: zones['A동'].x, y: zones['A동'].y + offset, zone: '축사 A동', isOutdoor: false },
-      { x: zones['B동'].x, y: zones['B동'].y - offset, zone: '축사 B동', isOutdoor: false },
-      { x: zones['B동'].x - offset, y: zones['B동'].y, zone: '축사 B동', isOutdoor: false },
-      { x: zones['B동'].x + offset, y: zones['B동'].y, zone: '축사 B동', isOutdoor: false },
-      { x: zones['B동'].x, y: zones['B동'].y + offset, zone: '축사 B동', isOutdoor: false },
-      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y - offset, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x - offset, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x + offset, y: zones['분뇨처리장'].y, zone: '분뇨처리장', isOutdoor: false },
-      { x: zones['분뇨처리장'].x, y: zones['분뇨처리장'].y + offset, zone: '분뇨처리장', isOutdoor: false }
-    );
+  // 직접 배출 계산
+  const directLivestock = Math.round(factor.livestock * headCount * (0.9 + random.next() * 0.2));
+  const directManure = Math.round(factor.manure * headCount * (0.9 + random.next() * 0.2));
+
+  // 투입량 계산
+  const feedAmount = Math.round(factor.feedPerHead * headCount);
+
+  // 규모별 전력/연료 사용량
+  const sizeMultiplier = size === 'small' ? 1 : size === 'medium' ? 2.5 : 5;
+  const electricityUsage = Math.round((500 + headCount * 2) * sizeMultiplier);
+  const dieselUsage = Math.round((30 + headCount * 0.3) * sizeMultiplier);
+  const lpgUsage = Math.round((20 + headCount * 0.2) * sizeMultiplier);
+
+  // 간접 배출 계산
+  // 사료: 사료량 × 배출계수
+  const feedEmission = Math.round(feedAmount * factor.feedEmission);
+
+  // 전력: kWh × 0.4563 kg CO2eq/kWh (한국 전력 배출계수)
+  const electricityEmission = Math.round(electricityUsage * 0.4563);
+
+  // 경유: L × 2.68 kg CO2eq/L
+  // LPG: kg × 3.0 kg CO2eq/kg
+  const fuelEmission = Math.round(dieselUsage * 2.68 + lpgUsage * 3.0);
+
+  // 기타 (비료, 약품 등): 전체의 약 5%
+  const otherEmission = Math.round((feedEmission + electricityEmission + fuelEmission) * 0.05);
+
+  return {
+    directEmissions: {
+      livestock: directLivestock,
+      manure: directManure,
+    },
+    indirectEmissions: {
+      feed: feedEmission,
+      electricity: electricityEmission,
+      fuel: fuelEmission,
+      other: otherEmission,
+    },
+    monthlyInputs: {
+      feedAmount,
+      electricityUsage,
+      dieselUsage,
+      lpgUsage,
+    },
+  };
+}
+
+// 과거 LCA 데이터 생성 (변동 포함)
+function generateHistoricalLCAData(
+  currentData: LCAData,
+  random: SeededRandom
+): LCAHistoricalData {
+  // 변동 범위 생성 함수
+  const applyVariation = (value: number, variationRange: number) => {
+    // -variationRange ~ +variationRange 범위에서 변동
+    const change = (random.next() - 0.5) * 2 * variationRange;
+    return Math.max(0, Math.round(value * (1 + change)));
+  };
+
+  // 어제 데이터 (±5% 변동)
+  const yesterday: LCAData = {
+    directEmissions: {
+      livestock: applyVariation(currentData.directEmissions.livestock, 0.05),
+      manure: applyVariation(currentData.directEmissions.manure, 0.05),
+    },
+    indirectEmissions: {
+      feed: applyVariation(currentData.indirectEmissions.feed, 0.05),
+      electricity: applyVariation(currentData.indirectEmissions.electricity, 0.05),
+      fuel: applyVariation(currentData.indirectEmissions.fuel, 0.05),
+      other: applyVariation(currentData.indirectEmissions.other, 0.05),
+    },
+    monthlyInputs: {
+      feedAmount: applyVariation(currentData.monthlyInputs.feedAmount, 0.05),
+      electricityUsage: applyVariation(currentData.monthlyInputs.electricityUsage, 0.05),
+      dieselUsage: applyVariation(currentData.monthlyInputs.dieselUsage, 0.05),
+      lpgUsage: applyVariation(currentData.monthlyInputs.lpgUsage, 0.05),
+    },
+  };
+
+  // 지난주 데이터 (±10% 변동)
+  const lastWeek: LCAData = {
+    directEmissions: {
+      livestock: applyVariation(currentData.directEmissions.livestock, 0.10),
+      manure: applyVariation(currentData.directEmissions.manure, 0.10),
+    },
+    indirectEmissions: {
+      feed: applyVariation(currentData.indirectEmissions.feed, 0.10),
+      electricity: applyVariation(currentData.indirectEmissions.electricity, 0.10),
+      fuel: applyVariation(currentData.indirectEmissions.fuel, 0.10),
+      other: applyVariation(currentData.indirectEmissions.other, 0.10),
+    },
+    monthlyInputs: {
+      feedAmount: applyVariation(currentData.monthlyInputs.feedAmount, 0.10),
+      electricityUsage: applyVariation(currentData.monthlyInputs.electricityUsage, 0.10),
+      dieselUsage: applyVariation(currentData.monthlyInputs.dieselUsage, 0.10),
+      lpgUsage: applyVariation(currentData.monthlyInputs.lpgUsage, 0.10),
+    },
+  };
+
+  // 전월 데이터 (±15% 변동)
+  const lastMonth: LCAData = {
+    directEmissions: {
+      livestock: applyVariation(currentData.directEmissions.livestock, 0.15),
+      manure: applyVariation(currentData.directEmissions.manure, 0.15),
+    },
+    indirectEmissions: {
+      feed: applyVariation(currentData.indirectEmissions.feed, 0.15),
+      electricity: applyVariation(currentData.indirectEmissions.electricity, 0.15),
+      fuel: applyVariation(currentData.indirectEmissions.fuel, 0.15),
+      other: applyVariation(currentData.indirectEmissions.other, 0.15),
+    },
+    monthlyInputs: {
+      feedAmount: applyVariation(currentData.monthlyInputs.feedAmount, 0.15),
+      electricityUsage: applyVariation(currentData.monthlyInputs.electricityUsage, 0.15),
+      dieselUsage: applyVariation(currentData.monthlyInputs.dieselUsage, 0.15),
+      lpgUsage: applyVariation(currentData.monthlyInputs.lpgUsage, 0.15),
+    },
+  };
+
+  return {
+    yesterday,
+    lastWeek,
+    lastMonth,
+  };
+}
+
+// 배출량 측정을 위한 센서 배치 계산 (실제 건물 내부 + 외부 기준선)
+// 한국 축사 표준설계 기반으로 실제 건물 좌표 내부에 센서 배치
+// 메탄(CH4): 가축 상부, 암모니아(NH3): 가축 높이 근처
+function calculateEmissionMeasurementPositions(
+  livestock: LivestockType,
+  size: FarmSize
+): Array<{ x: number; y: number; zone: string; isOutdoor: boolean }> {
+  const positions: Array<{ x: number; y: number; zone: string; isOutdoor: boolean }> = [];
+
+  // 축종별 건물 좌표 (FloorPlanView.tsx와 동일)
+  const buildingCoords = {
+    beef_cattle: {
+      barn1: { x: 40, width: 140, y: 40, height: 90, label: '우사 1동' },
+      barn2: { x: 220, width: 140, y: 40, height: 90, label: '우사 2동' },
+      manure: { x: 160, width: 100, y: 160, height: 55, label: '분뇨처리장' },
+    },
+    dairy_cattle: {
+      milking: { x: 110, width: 80, y: 45, height: 50, label: '착유실' },
+      barn: { x: 210, width: 150, y: 30, height: 80, label: '착유우사' },
+      calf: { x: 40, width: 80, y: 130, height: 60, label: '송아지사' },
+      manure: { x: 230, width: 90, y: 130, height: 60, label: '분뇨처리장' },
+    },
+    pig: {
+      farrowing: { x: 30, width: 100, y: 30, height: 55, label: '분만사' },
+      nursery: { x: 150, width: 90, y: 30, height: 55, label: '자돈사' },
+      grower: { x: 260, width: 90, y: 30, height: 55, label: '육성사' },
+      finisher1: { x: 30, width: 150, y: 110, height: 70, label: '비육사 1동' },
+      finisher2: { x: 200, width: 150, y: 110, height: 70, label: '비육사 2동' },
+      manure: { x: 220, width: 130, y: 205, height: 40, label: '분뇨처리장' },
+    },
+  };
+
+  // 건물 내부에 센서 배치하는 헬퍼 함수
+  const addSensorsToBuilding = (
+    building: { x: number; width: number; y: number; height: number; label: string },
+    count: number
+  ) => {
+    const centerX = building.x + building.width / 2;
+    const centerY = building.y + building.height / 2;
+
+    if (count === 1) {
+      positions.push({ x: centerX, y: centerY, zone: building.label, isOutdoor: false });
+    } else if (count === 2) {
+      // 좌우 배치 (메탄 측정 최적화)
+      positions.push(
+        { x: building.x + building.width * 0.33, y: centerY, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.67, y: centerY, zone: building.label, isOutdoor: false }
+      );
+    } else if (count === 3) {
+      // 좌중우 배치
+      positions.push(
+        { x: building.x + building.width * 0.25, y: centerY, zone: building.label, isOutdoor: false },
+        { x: centerX, y: centerY, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.75, y: centerY, zone: building.label, isOutdoor: false }
+      );
+    } else if (count === 4) {
+      // 사각 배치 (전후좌우)
+      positions.push(
+        { x: building.x + building.width * 0.33, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.67, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.33, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.67, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false }
+      );
+    } else if (count === 6) {
+      // 2×3 배치
+      positions.push(
+        { x: building.x + building.width * 0.25, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.5, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.75, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.25, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.5, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false },
+        { x: building.x + building.width * 0.75, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false }
+      );
+    }
+  };
+
+  // 축종별 센서 배치
+  if (livestock === 'beef_cattle') {
+    const coords = buildingCoords.beef_cattle;
+    if (size === 'small') {
+      addSensorsToBuilding(coords.barn1, 2);
+      addSensorsToBuilding(coords.barn2, 2);
+      addSensorsToBuilding(coords.manure, 2);
+    } else if (size === 'medium') {
+      addSensorsToBuilding(coords.barn1, 3);
+      addSensorsToBuilding(coords.barn2, 3);
+      addSensorsToBuilding(coords.manure, 4);
+    } else {
+      addSensorsToBuilding(coords.barn1, 4);
+      addSensorsToBuilding(coords.barn2, 4);
+      addSensorsToBuilding(coords.manure, 6);
+    }
+  } else if (livestock === 'dairy_cattle') {
+    const coords = buildingCoords.dairy_cattle;
+    if (size === 'small') {
+      addSensorsToBuilding(coords.milking, 2);
+      addSensorsToBuilding(coords.barn, 2);
+      addSensorsToBuilding(coords.calf, 1);
+      addSensorsToBuilding(coords.manure, 2);
+    } else if (size === 'medium') {
+      addSensorsToBuilding(coords.milking, 3);
+      addSensorsToBuilding(coords.barn, 3);
+      addSensorsToBuilding(coords.calf, 2);
+      addSensorsToBuilding(coords.manure, 3);
+    } else {
+      addSensorsToBuilding(coords.milking, 4);
+      addSensorsToBuilding(coords.barn, 4);
+      addSensorsToBuilding(coords.calf, 3);
+      addSensorsToBuilding(coords.manure, 4);
+    }
+  } else if (livestock === 'pig') {
+    const coords = buildingCoords.pig;
+    if (size === 'small') {
+      addSensorsToBuilding(coords.farrowing, 2);
+      addSensorsToBuilding(coords.nursery, 2);
+      addSensorsToBuilding(coords.grower, 2);
+      addSensorsToBuilding(coords.finisher1, 1);
+      addSensorsToBuilding(coords.finisher2, 1);
+      addSensorsToBuilding(coords.manure, 2);
+    } else if (size === 'medium') {
+      addSensorsToBuilding(coords.farrowing, 2);
+      addSensorsToBuilding(coords.nursery, 2);
+      addSensorsToBuilding(coords.grower, 2);
+      addSensorsToBuilding(coords.finisher1, 2);
+      addSensorsToBuilding(coords.finisher2, 2);
+      addSensorsToBuilding(coords.manure, 2);
+    } else {
+      addSensorsToBuilding(coords.farrowing, 3);
+      addSensorsToBuilding(coords.nursery, 3);
+      addSensorsToBuilding(coords.grower, 3);
+      addSensorsToBuilding(coords.finisher1, 3);
+      addSensorsToBuilding(coords.finisher2, 3);
+      addSensorsToBuilding(coords.manure, 2);
+    }
   }
 
-  // 2. 외부 기준선 센서 배치 (모든 규모 동서남북 4개 고정)
-  // 바람은 사방에서 불 수 있으므로 4방향 측정 필수
+  // 외부 기준선 센서 배치 (모든 축종/규모 동일 - 동서남북 4개 고정)
+  // 대기 배경 농도 측정용 (실제 배출량 = 내부 농도 - 외부 배경 농도)
+  // 풍향이 바뀌므로 4방향 측정 필수
   const outdoorPositions = [
-    { x: 5, y: 50, zone: '외부 기준선 (서)', isOutdoor: true },
-    { x: 95, y: 50, zone: '외부 기준선 (동)', isOutdoor: true },
-    { x: 50, y: 5, zone: '외부 기준선 (북)', isOutdoor: true },
-    { x: 50, y: 95, zone: '외부 기준선 (남)', isOutdoor: true },
+    { x: 3, y: 50, zone: '외부 기준선 (서)', isOutdoor: true },
+    { x: 97, y: 50, zone: '외부 기준선 (동)', isOutdoor: true },
+    { x: 50, y: 3, zone: '외부 기준선 (북)', isOutdoor: true },
+    { x: 50, y: 97, zone: '외부 기준선 (남)', isOutdoor: true },
   ];
 
   positions.push(...outdoorPositions);

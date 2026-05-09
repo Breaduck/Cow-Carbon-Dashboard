@@ -1,4 +1,4 @@
-import { Farm } from '../../types';
+import { Farm, LivestockType } from '../../types';
 import { getSensorsByFarmId } from '../../data';
 import { Card } from '../common';
 
@@ -6,37 +6,118 @@ interface FloorPlanViewProps {
   farm: Farm;
 }
 
+// 축종별 농장 레이아웃 정의 (한국 축사 표준설계 기준)
+// 한우: 병렬형 우사 배치, 우사 1칸 4.8m×9.6m 기준
+// 젖소: 착유실-대기장-우사 동선 고려
+// 돼지: 종돈사→분만사→자돈사→육성사→비육사→분뇨처리장 순
+const FARM_LAYOUTS: Record<LivestockType, {
+  title: string;
+  buildings: Array<{
+    id: string;       // 센서 배치용 식별자
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    label: string;
+    color: string;
+    isSensorZone: boolean;  // 센서 설치 구역 여부
+  }>;
+}> = {
+  beef_cattle: {
+    title: '한우 농장',
+    buildings: [
+      // 우사 병렬 배치 (4.8m×9.6m 비율 반영, 간격 확보)
+      { id: 'barn1', x: 40, y: 40, width: 140, height: 90, label: '우사 1동', color: '#fef3c7', isSensorZone: true },
+      { id: 'barn2', x: 220, y: 40, width: 140, height: 90, label: '우사 2동', color: '#fef3c7', isSensorZone: true },
+      // 부속시설
+      { id: 'feed', x: 40, y: 160, width: 90, height: 55, label: '조사료창고', color: '#dbeafe', isSensorZone: false },
+      { id: 'manure', x: 160, y: 160, width: 100, height: 55, label: '분뇨처리장', color: '#dcfce7', isSensorZone: true },
+      { id: 'office', x: 290, y: 160, width: 70, height: 55, label: '관리실', color: '#e5e7eb', isSensorZone: false },
+    ],
+  },
+  dairy_cattle: {
+    title: '젖소 농장',
+    buildings: [
+      // 착유 동선: 대기장 → 착유실 → 우사
+      { id: 'waiting', x: 40, y: 45, width: 60, height: 50, label: '대기장', color: '#e0e7ff', isSensorZone: false },
+      { id: 'milking', x: 110, y: 45, width: 80, height: 50, label: '착유실', color: '#fce7f3', isSensorZone: true },
+      { id: 'barn', x: 210, y: 30, width: 150, height: 80, label: '착유우사', color: '#fef3c7', isSensorZone: true },
+      // 하단 시설
+      { id: 'calf', x: 40, y: 130, width: 80, height: 60, label: '송아지사', color: '#fef9c4', isSensorZone: true },
+      { id: 'feed', x: 140, y: 130, width: 70, height: 60, label: '사료창고', color: '#dbeafe', isSensorZone: false },
+      { id: 'manure', x: 230, y: 130, width: 90, height: 60, label: '분뇨처리장', color: '#dcfce7', isSensorZone: true },
+      { id: 'office', x: 340, y: 130, width: 50, height: 60, label: '관리실', color: '#e5e7eb', isSensorZone: false },
+    ],
+  },
+  pig: {
+    title: '돼지 농장',
+    buildings: [
+      // 상단: 번식돈사 (바람 상류)
+      { id: 'farrowing', x: 30, y: 30, width: 100, height: 55, label: '분만사', color: '#fce7f3', isSensorZone: true },
+      { id: 'nursery', x: 150, y: 30, width: 90, height: 55, label: '자돈사', color: '#fef9c4', isSensorZone: true },
+      { id: 'grower', x: 260, y: 30, width: 90, height: 55, label: '육성사', color: '#fed7aa', isSensorZone: true },
+      // 하단: 비육돈사 (바람 하류)
+      { id: 'finisher1', x: 30, y: 110, width: 150, height: 70, label: '비육사 1동', color: '#ffedd5', isSensorZone: true },
+      { id: 'finisher2', x: 200, y: 110, width: 150, height: 70, label: '비육사 2동', color: '#ffedd5', isSensorZone: true },
+      // 최하단: 부속시설
+      { id: 'feed', x: 30, y: 205, width: 70, height: 40, label: '사료빈', color: '#dbeafe', isSensorZone: false },
+      { id: 'shipping', x: 120, y: 205, width: 80, height: 40, label: '출하대', color: '#e5e7eb', isSensorZone: false },
+      { id: 'manure', x: 220, y: 205, width: 130, height: 40, label: '분뇨처리장', color: '#dcfce7', isSensorZone: true },
+    ],
+  },
+};
+
 export function FloorPlanView({ farm }: FloorPlanViewProps) {
   const sensors = getSensorsByFarmId(farm.id);
+  const layout = FARM_LAYOUTS[farm.livestock.type];
 
   // 내부/외부 센서 분류
   const indoorSensors = sensors.filter(s => !s.location.zone.includes('외부'));
   const outdoorSensors = sensors.filter(s => s.location.zone.includes('외부'));
 
   return (
-    <Card title="센서 배치도 (내부 + 외부 기준선)" padding="lg">
+    <Card title={`센서 배치도 - ${layout.title}`} padding="lg">
       <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl overflow-hidden border border-gray-200">
-        {/* 축사 구조 */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
-          {/* 메인 건물 */}
-          <rect x="50" y="50" width="300" height="200" fill="white" stroke="#d1d5db" strokeWidth="2" rx="8"/>
-
-          {/* 구역 구분선 */}
-          <line x1="200" y1="50" x2="200" y2="250" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4"/>
-          <line x1="50" y1="150" x2="350" y2="150" stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4"/>
-
-          {/* 구역 라벨 */}
-          <text x="125" y="100" textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="500">A동</text>
-          <text x="275" y="100" textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="500">B동</text>
-          <text x="125" y="200" textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="500">분뇨처리장</text>
-          <text x="275" y="200" textAnchor="middle" fontSize="12" fill="#6b7280" fontWeight="500">사료창고</text>
-
           {/* 외곽 표시 (농장 경계) */}
-          <rect x="10" y="10" width="380" height="280" fill="none" stroke="#94a3b8" strokeWidth="1" strokeDasharray="5,5" rx="4"/>
+          <rect x="10" y="10" width="380" height="280" fill="none" stroke="#94a3b8" strokeWidth="2" strokeDasharray="8,4" rx="4"/>
+
+          {/* 농장 도로 표시 */}
+          <rect x="10" y="280" width="380" height="10" fill="#9ca3af" opacity="0.3"/>
+
+          {/* 축종별 건물 배치 */}
+          {layout.buildings.map((building, idx) => (
+            <g key={idx}>
+              {/* 건물 */}
+              <rect
+                x={building.x}
+                y={building.y}
+                width={building.width}
+                height={building.height}
+                fill={building.color}
+                stroke="#9ca3af"
+                strokeWidth="2"
+                rx="4"
+              />
+              {/* 건물 라벨 */}
+              <text
+                x={building.x + building.width / 2}
+                y={building.y + building.height / 2}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="11"
+                fill="#374151"
+                fontWeight="600"
+              >
+                {building.label}
+              </text>
+            </g>
+          ))}
+
         </svg>
 
         {/* 내부 센서 위치 */}
-        {indoorSensors.map((sensor, idx) => {
+        {indoorSensors.map((sensor) => {
           const x = sensor.location.x;
           const y = sensor.location.y;
 
@@ -60,7 +141,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
         })}
 
         {/* 외부 기준선 센서 위치 */}
-        {outdoorSensors.map((sensor, idx) => {
+        {outdoorSensors.map((sensor) => {
           const x = sensor.location.x;
           const y = sensor.location.y;
 
