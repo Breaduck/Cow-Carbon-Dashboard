@@ -307,8 +307,8 @@ export function MapPage() {
                 </svg>
               }
               onClick={() => {
-                // 모든 필터 초기화하여 전체 농장 표시
-                setFilter('livestock', []);
+                // 모든 축종 필터 추가하여 전체 농장 표시
+                setFilter('livestock', ['beef_cattle', 'pig', 'dairy_cattle']);
                 setFilter('grade', []);
                 setFilter('sido', []);
                 setSearchQuery('');
