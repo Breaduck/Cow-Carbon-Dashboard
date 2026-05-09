@@ -18,27 +18,6 @@ const defaultCenter = {
   lng: 127.5,
 };
 
-// 지역별 중심 좌표 및 줌 레벨
-const REGION_CENTERS: Record<string, { lat: number; lng: number; zoom: number }> = {
-  '서울특별시': { lat: 37.5665, lng: 126.9780, zoom: 11 },
-  '경기도': { lat: 37.4138, lng: 127.5183, zoom: 9 },
-  '인천광역시': { lat: 37.4563, lng: 126.7052, zoom: 10 },
-  '부산광역시': { lat: 35.1796, lng: 129.0756, zoom: 10 },
-  '대구광역시': { lat: 35.8714, lng: 128.6014, zoom: 10 },
-  '광주광역시': { lat: 35.1595, lng: 126.8526, zoom: 10 },
-  '울산광역시': { lat: 35.5384, lng: 129.3114, zoom: 10 },
-  '대전광역시': { lat: 36.3504, lng: 127.3845, zoom: 10 },
-  '세종특별자치시': { lat: 36.4800, lng: 127.2890, zoom: 11 },
-  '강원특별자치도': { lat: 37.8228, lng: 128.1555, zoom: 9 },
-  '충청북도': { lat: 36.8, lng: 127.7, zoom: 9 },
-  '충청남도': { lat: 36.5184, lng: 126.8000, zoom: 9 },
-  '전북특별자치도': { lat: 35.7175, lng: 127.1530, zoom: 9 },
-  '전라남도': { lat: 34.8679, lng: 126.9910, zoom: 9 },
-  '경상북도': { lat: 36.4919, lng: 128.8889, zoom: 9 },
-  '경상남도': { lat: 35.4606, lng: 128.2132, zoom: 9 },
-  '제주특별자치도': { lat: 33.4890, lng: 126.4983, zoom: 10 },
-};
-
 const mapOptions = {
   disableDefaultUI: false,
   zoomControl: true,
