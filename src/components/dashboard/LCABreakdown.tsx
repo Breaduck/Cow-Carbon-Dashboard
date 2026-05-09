@@ -339,20 +339,20 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                   text: 'text-red-900',
                 },
                 medium: {
+                  bg: 'bg-red-50',
+                  border: 'border-red-500',
+                  shadow: 'shadow-lg shadow-red-200',
+                  animation: 'pulse-slow 3s ease-in-out infinite',
+                  badge: 'bg-red-100 text-red-800',
+                  text: 'text-red-900',
+                },
+                low: {
                   bg: 'bg-yellow-50',
                   border: 'border-yellow-500',
                   shadow: 'shadow-lg shadow-yellow-200',
                   animation: 'pulse-slow 4s ease-in-out infinite',
                   badge: 'bg-yellow-100 text-yellow-800',
                   text: 'text-yellow-900',
-                },
-                low: {
-                  bg: 'bg-gray-50',
-                  border: 'border-gray-300',
-                  shadow: '',
-                  animation: '',
-                  badge: 'bg-gray-200 text-gray-700',
-                  text: 'text-gray-900',
                 },
               };
 
