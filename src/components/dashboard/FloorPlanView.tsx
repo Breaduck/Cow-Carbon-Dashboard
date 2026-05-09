@@ -1,3 +1,4 @@
+import React from 'react';
 import { Farm, LivestockType } from '../../types';
 import { getSensorsByFarmId } from '../../data';
 import { Card } from '../common';
@@ -80,9 +81,9 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
 
     const positions: Array<{ x: number; y: number }> = [];
     const cattlePerZone = farm.size === 'large' ? 3 : 2;
-    const rowHeight = building.height * 0.4;
     const zoneWidth = building.width / 3;
     const spacing = zoneWidth / (cattlePerZone + 1);
+    const padding = 3; // 여백
 
     // 위 줄 + 아래 줄
     [0.25, 0.75].forEach(rowRatio => {
@@ -91,7 +92,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
         // 구역당 소 배치
         for (let i = 0; i < cattlePerZone; i++) {
           positions.push({
-            x: building.x + zone * zoneWidth + spacing * (i + 1),
+            x: building.x + zone * zoneWidth + spacing * (i + 1) + padding,
             y: building.y + building.height * rowRatio
           });
         }
@@ -100,6 +101,8 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
 
     return positions;
   };
+
+  const [hoveredCapsule, setHoveredCapsule] = React.useState<string | null>(null);
 
   return (
     <Card title={`센서 배치도 - ${layout.title}`} padding="lg">
@@ -140,16 +143,26 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
                   <line x1={building.x + building.width * 2 / 3} y1={building.y + building.height * 0.55} x2={building.x + building.width * 2 / 3} y2={building.y + building.height} stroke="#d1d5db" strokeWidth="1" strokeDasharray="3,2" />
 
                   {/* 소 개체 */}
-                  {getCattlePositions(building).map((pos, i) => (
-                    <g key={i}>
-                      {/* 소 (갈색 세로 타원) */}
-                      <ellipse cx={pos.x} cy={pos.y} rx="7.5" ry="12" fill="#8B4513" stroke="#654321" strokeWidth="0.8" />
-                      {/* 캡슐 센서 (초록 점) */}
-                      <circle cx={pos.x} cy={pos.y} r="2.4" fill="#10b981" className="cursor-pointer">
-                        <title>캡슐센서 - 장내발효 측정</title>
-                      </circle>
-                    </g>
-                  ))}
+                  {getCattlePositions(building).map((pos, i) => {
+                    const cattleId = `${building.id}-cattle-${i}`;
+                    const toPercent = (val: number, max: number) => (val / max) * 100;
+
+                    return (
+                      <g key={i}>
+                        {/* 소 이모티콘 */}
+                        <text
+                          x={pos.x}
+                          y={pos.y}
+                          fontSize="14"
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          style={{ userSelect: 'none' }}
+                        >
+                          🐄
+                        </text>
+                      </g>
+                    );
+                  })}
                 </>
               )}
 
@@ -169,6 +182,40 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
           ))}
 
         </svg>
+
+        {/* 소 내부 캡슐 센서 (HTML overlay) */}
+        {(farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle') &&
+          layout.buildings.filter(b => b.label.includes('우사')).map(building =>
+            getCattlePositions(building).map((pos, i) => {
+              const cattleId = `${building.id}-cattle-${i}`;
+              // SVG viewBox 좌표를 % 좌표로 변환
+              const xPercent = (pos.x / 400) * 100;
+              const yPercent = (pos.y / 300) * 100;
+
+              return (
+                <div
+                  key={cattleId}
+                  className="absolute group"
+                  style={{ left: `${xPercent}%`, top: `${yPercent}%`, transform: 'translate(-50%, -50%)' }}
+                  onMouseEnter={() => setHoveredCapsule(cattleId)}
+                  onMouseLeave={() => setHoveredCapsule(null)}
+                >
+                  {/* 캡슐 센서 (초록 점) */}
+                  <div className="w-2 h-2 rounded-full bg-green-500 cursor-pointer" />
+
+                  {/* 툴팁 */}
+                  {hoveredCapsule === cattleId && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none z-20">
+                      <div className="bg-green-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
+                        캡슐센서 - 장내발효 측정
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )
+        }
 
         {/* 내부 센서 위치 */}
         {indoorSensors.map((sensor) => {
