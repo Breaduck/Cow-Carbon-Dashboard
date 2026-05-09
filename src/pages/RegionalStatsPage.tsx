@@ -71,7 +71,7 @@ export function RegionalStatsPage() {
           {/* 왼쪽: 한국 지도 */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
             <h2 className="text-base md:text-lg font-semibold text-gray-900 mb-4">권역별 분포</h2>
-            <div className="h-[400px] md:h-[500px]">
+            <div className="h-[500px] md:h-[600px]">
               <KoreaRegionMap
                 regionalStats={regionalStats}
                 onRegionClick={setSelectedRegion}
