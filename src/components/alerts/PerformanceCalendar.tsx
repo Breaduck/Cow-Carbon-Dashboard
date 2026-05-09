@@ -74,7 +74,7 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
   };
 
   // 날짜별 상세 정보
-  const getDayDetail = (date: Date, performance: DayPerformance) => {
+  const getDayDetail = (_date: Date, performance: DayPerformance) => {
     if (performance === 'none') return null;
 
     if (performance === 'good') {
