@@ -73,6 +73,7 @@ export function RegionalDetailModal({
   const navigate = useNavigate();
   const { selectFarm } = useStore();
   const [selectedIssue, setSelectedIssue] = useState<{category: string; farms: string[]} | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<'critical' | 'warning' | 'good' | null>(null);
   const regionalData = useMemo(() => {
     if (!region) return null;
 
@@ -153,22 +154,77 @@ export function RegionalDetailModal({
       <div className="space-y-6">
         {/* 전체 요약 */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+          <button
+            onClick={() => setSelectedStatus(selectedStatus === 'critical' ? null : 'critical')}
+            className="bg-red-50 rounded-lg p-4 border-2 border-red-200 hover:bg-red-100 transition-colors cursor-pointer text-left"
+          >
             <div className="text-sm text-red-700 mb-1">위기 농가</div>
             <div className="text-3xl font-bold text-red-900">{regionalData.criticalFarms.length}</div>
-            <div className="text-xs text-red-600 mt-1">즉시 조치 필요</div>
-          </div>
-          <div className="bg-yellow-50 rounded-lg p-4 border-2 border-yellow-200">
+            <div className="text-xs text-red-600 mt-1">
+              즉시 조치 필요 {selectedStatus === 'critical' ? '▲' : '▼'}
+            </div>
+          </button>
+          <button
+            onClick={() => setSelectedStatus(selectedStatus === 'warning' ? null : 'warning')}
+            className="bg-yellow-50 rounded-lg p-4 border-2 border-yellow-200 hover:bg-yellow-100 transition-colors cursor-pointer text-left"
+          >
             <div className="text-sm text-yellow-700 mb-1">경고 농가</div>
             <div className="text-3xl font-bold text-yellow-900">{regionalData.warningFarms.length}</div>
-            <div className="text-xs text-yellow-600 mt-1">모니터링 필요</div>
-          </div>
-          <div className="bg-green-50 rounded-lg p-4 border-2 border-green-200">
+            <div className="text-xs text-yellow-600 mt-1">
+              모니터링 필요 {selectedStatus === 'warning' ? '▲' : '▼'}
+            </div>
+          </button>
+          <button
+            onClick={() => setSelectedStatus(selectedStatus === 'good' ? null : 'good')}
+            className="bg-green-50 rounded-lg p-4 border-2 border-green-200 hover:bg-green-100 transition-colors cursor-pointer text-left"
+          >
             <div className="text-sm text-green-700 mb-1">양호 농가</div>
             <div className="text-3xl font-bold text-green-900">{regionalData.goodFarms.length}</div>
-            <div className="text-xs text-green-600 mt-1">정상 운영</div>
-          </div>
+            <div className="text-xs text-green-600 mt-1">
+              정상 운영 {selectedStatus === 'good' ? '▲' : '▼'}
+            </div>
+          </button>
         </div>
+
+        {/* 농가 리스트 */}
+        {selectedStatus && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="text-base font-semibold text-gray-900 mb-3">
+              {selectedStatus === 'critical' && '위기 농가 목록'}
+              {selectedStatus === 'warning' && '경고 농가 목록'}
+              {selectedStatus === 'good' && '양호 농가 목록'}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {(selectedStatus === 'critical' ? regionalData.criticalFarms :
+                selectedStatus === 'warning' ? regionalData.warningFarms :
+                regionalData.goodFarms).map((farm) => (
+                <button
+                  key={farm.id}
+                  onClick={() => {
+                    selectFarm(farm.id);
+                    navigate('/dashboard');
+                    onClose();
+                  }}
+                  className={`p-3 rounded-lg border-2 hover:shadow-md transition-all text-left ${
+                    selectedStatus === 'critical'
+                      ? 'bg-white border-red-300 hover:border-red-400 hover:bg-red-50'
+                      : selectedStatus === 'warning'
+                      ? 'bg-white border-yellow-300 hover:border-yellow-400 hover:bg-yellow-50'
+                      : 'bg-white border-green-300 hover:border-green-400 hover:bg-green-50'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">{farm.name}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {LIVESTOCK_INFO[farm.livestock.type].nameKo} · {farm.certification.grade}등급
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {farm.livestock.headCount}두 사육
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 차트 영역 */}
         <div className="grid grid-cols-2 gap-6">
