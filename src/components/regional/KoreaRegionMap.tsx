@@ -57,7 +57,7 @@ export function KoreaRegionMap({ regionalStats, onRegionClick }: KoreaRegionMapP
           return (
             <g
               key={stat.region}
-              className="cursor-pointer transition-transform hover:scale-110"
+              className="cursor-pointer"
               onClick={() => onRegionClick(stat.region)}
             >
               {/* 원형 마커 */}
@@ -67,7 +67,7 @@ export function KoreaRegionMap({ regionalStats, onRegionClick }: KoreaRegionMapP
                 r={radius}
                 fill="#4338ca"
                 opacity="0.9"
-                className="transition-all hover:fill-indigo-700"
+                className="transition-opacity hover:opacity-100"
               />
 
               {/* 농장 수 */}

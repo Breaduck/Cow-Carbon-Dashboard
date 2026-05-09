@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Modal } from '../common/Modal';
-import { Farm, Alert, LIVESTOCK_INFO, LCAData } from '../../types';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { Farm, Alert, LIVESTOCK_INFO } from '../../types';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface RegionalDetailModalProps {
   isOpen: boolean;
