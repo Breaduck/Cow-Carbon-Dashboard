@@ -25,3 +25,7 @@ dist-ssr
 
 # Claude
 .claude
+
+# Environment variables
+.env
+.env.local

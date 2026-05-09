@@ -108,7 +108,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
     <Card title={`센서 배치도 - ${layout.title}`} padding="lg">
       <div className="flex flex-col items-center justify-center">
         <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl overflow-hidden border border-gray-200">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
           {/* 외곽 표시 (농장 경계) */}
           <rect x="10" y="10" width="380" height="280" fill="none" stroke="#94a3b8" strokeWidth="2" strokeDasharray="8,4" rx="4"/>
 
@@ -176,11 +176,10 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
               </text>
             </g>
           ))}
+          </svg>
 
-        </svg>
-
-        {/* 소 내부 캡슐 센서 (HTML overlay) */}
-        {(farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle') &&
+          {/* 소 내부 캡슐 센서 (HTML overlay) */}
+          {(farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle') &&
           layout.buildings.filter(b => b.label.includes('우사')).map(building =>
             getCattlePositions(building).map((pos, i) => {
               const cattleId = `${building.id}-cattle-${i}`;
@@ -210,11 +209,10 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
                 </div>
               );
             })
-          )
-        }
+          )}
 
-        {/* 내부 센서 위치 */}
-        {indoorSensors.map((sensor) => {
+          {/* 내부 센서 위치 */}
+          {indoorSensors.map((sensor) => {
           const x = sensor.location.x;
           const y = sensor.location.y;
 
@@ -235,10 +233,10 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
               </div>
             </div>
           );
-        })}
+          })}
 
-        {/* 외부 센서 위치 */}
-        {outdoorSensors.map((sensor) => {
+          {/* 외부 센서 위치 */}
+          {outdoorSensors.map((sensor) => {
           const x = sensor.location.x;
           const y = sensor.location.y;
 
@@ -259,12 +257,10 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
               </div>
             </div>
           );
-        })}
-      </div>
-
+          })}
         </div>
 
-        <div className="mt-4 flex items-center gap-4 text-xs">
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
             <span className="text-gray-600">내부 센서</span>

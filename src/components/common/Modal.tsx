@@ -62,7 +62,7 @@ export function Modal({
 
       {/* Modal content */}
       <div
-        className={`relative w-full ${sizeClasses[size]} my-8 bg-white rounded-xl shadow-xl max-h-[90vh] overflow-hidden flex flex-col`}
+        className={`relative w-full ${sizeClasses[size]} my-8 bg-white rounded-xl shadow-xl max-h-[90vh] flex flex-col`}
       >
         {/* Header */}
         {title && (
@@ -80,7 +80,7 @@ export function Modal({
         )}
 
         {/* Body */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-6 overflow-y-auto">
           {children}
         </div>
       </div>
