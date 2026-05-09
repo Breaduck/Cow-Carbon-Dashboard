@@ -91,19 +91,45 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
       <Card padding="lg" className="backdrop-blur-xl bg-white/80">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: `${livestockInfo.color}15` }}>
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0" style={{ backgroundColor: `${livestockInfo.color}15` }}>
               {livestockInfo.icon}
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{farm.name}</h2>
               <p className="text-sm text-gray-500 mt-0.5">{farm.owner} 대표</p>
             </div>
+            <div className="flex flex-col gap-2 ml-auto">
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                {farm.location.address}
+              </div>
+              <button
+                onClick={() => setShowNotificationModal(true)}
+                className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                알림톡
+              </button>
+            </div>
           </div>
 
           {/* 성과 메시지 */}
           <div
-            className={`mb-4 px-4 py-3 rounded-lg border-2 ${performanceMsg.color} font-medium text-sm transition-all`}
+            className={`mb-4 px-4 py-3 rounded-lg border-2 font-medium text-sm transition-all ${
+              performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
+                ? performanceMsg.color
+                : performanceMsg.type === 'excellent'
+                ? 'bg-green-50 border-green-500 text-green-800'
+                : performanceMsg.type === 'good'
+                ? 'bg-blue-50 border-blue-500 text-blue-800'
+                : performanceMsg.color
+            }`}
             style={{
               animation: performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
                 ? 'pulse-slow 3s ease-in-out infinite'
@@ -149,27 +175,6 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-6 pt-6 border-t border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {farm.location.address}
-          </div>
-          <button
-            onClick={() => setShowNotificationModal(true)}
-            className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            알림톡
-          </button>
         </div>
       </div>
     </Card>
