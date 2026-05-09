@@ -78,10 +78,6 @@ export function MapPage() {
     }
   }, [inputKey]);
 
-  const handleChangeApiKey = useCallback(() => {
-    setShowApiKeyInput(true);
-  }, []);
-
   const livestockStats = useMemo(() => {
     // 한우, 돼지, 젖소 순서로 정렬
     const order: Array<keyof typeof LIVESTOCK_INFO> = ['beef_cattle', 'pig', 'dairy_cattle'];
@@ -427,14 +423,6 @@ export function MapPage() {
             </InfoWindowF>
           )}
         </GoogleMap>
-
-        {/* API 키 변경 버튼 */}
-        <button
-          onClick={handleChangeApiKey}
-          className="absolute bottom-4 right-4 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg shadow-sm text-sm text-gray-700 transition-colors"
-        >
-          API 키 변경
-        </button>
       </div>
     </div>
   );
