@@ -41,14 +41,14 @@ export function DashboardPage() {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <FarmOverview farm={selectedFarm} />
 
-        <LCABreakdown farm={selectedFarm} />
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FloorPlanView farm={selectedFarm} />
           <GasGauges farm={selectedFarm} />
         </div>
 
         <EmissionChart farm={selectedFarm} />
+
+        <LCABreakdown farm={selectedFarm} />
 
         <AlertList farmId={selectedFarm.id} />
       </div>
