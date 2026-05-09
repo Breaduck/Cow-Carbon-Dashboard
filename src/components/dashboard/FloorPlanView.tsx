@@ -143,9 +143,11 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
                   {getCattlePositions(building).map((pos, i) => (
                     <g key={i}>
                       {/* 소 (갈색 세로 타원) */}
-                      <ellipse cx={pos.x} cy={pos.y} rx="2.5" ry="4" fill="#8B4513" stroke="#654321" strokeWidth="0.5" />
+                      <ellipse cx={pos.x} cy={pos.y} rx="7.5" ry="12" fill="#8B4513" stroke="#654321" strokeWidth="0.8" />
                       {/* 캡슐 센서 (초록 점) */}
-                      <circle cx={pos.x} cy={pos.y} r="0.8" fill="#10b981" />
+                      <circle cx={pos.x} cy={pos.y} r="2.4" fill="#10b981" className="cursor-pointer">
+                        <title>캡슐센서 - 장내발효 측정</title>
+                      </circle>
                     </g>
                   ))}
                 </>
