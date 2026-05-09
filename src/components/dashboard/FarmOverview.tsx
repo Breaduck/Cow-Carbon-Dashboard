@@ -121,16 +121,16 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
 
           {/* 성과 메시지 */}
           <div
-            className={`mb-4 p-3 rounded-lg border-2 transition-all inline-block ${
+            className={`mb-4 p-3 rounded-lg transition-all inline-block ${
               performanceMsg.type === 'warning'
-                ? 'bg-red-50 border-red-500'
+                ? 'bg-red-50'
                 : performanceMsg.type === 'caution'
-                ? 'bg-orange-50 border-orange-500'
+                ? 'bg-orange-50'
                 : performanceMsg.type === 'excellent'
-                ? 'bg-green-50 border-green-500'
+                ? 'bg-green-50'
                 : performanceMsg.type === 'good'
-                ? 'bg-blue-50 border-blue-500'
-                : 'bg-gray-50 border-gray-500'
+                ? 'bg-blue-50'
+                : 'bg-gray-50'
             }`}
           >
             <p className={`text-sm font-semibold ${
