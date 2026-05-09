@@ -74,6 +74,33 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
   const indoorSensors = sensors.filter(s => !s.location.zone.includes('외부'));
   const outdoorSensors = sensors.filter(s => s.location.zone.includes('외부'));
 
+  // 소 개체 위치 계산 (한우, 젖소 우사만)
+  const getCattlePositions = (building: typeof layout.buildings[0]) => {
+    if (!building.label.includes('우사')) return [];
+
+    const positions: Array<{ x: number; y: number }> = [];
+    const cattlePerZone = farm.size === 'large' ? 3 : 2;
+    const rowHeight = building.height * 0.4;
+    const zoneWidth = building.width / 3;
+    const spacing = zoneWidth / (cattlePerZone + 1);
+
+    // 위 줄 + 아래 줄
+    [0.25, 0.75].forEach(rowRatio => {
+      // 3개 구역
+      for (let zone = 0; zone < 3; zone++) {
+        // 구역당 소 배치
+        for (let i = 0; i < cattlePerZone; i++) {
+          positions.push({
+            x: building.x + zone * zoneWidth + spacing * (i + 1),
+            y: building.y + building.height * rowRatio
+          });
+        }
+      }
+    });
+
+    return positions;
+  };
+
   return (
     <Card title={`센서 배치도 - ${layout.title}`} padding="lg">
       <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl overflow-hidden border border-gray-200">
@@ -98,6 +125,32 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
                 strokeWidth="2"
                 rx="4"
               />
+
+              {/* 우사 내부 구역선 (한우/젖소) */}
+              {building.label.includes('우사') && (farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle') && (
+                <>
+                  {/* 가운데 통로 (가로선 2개) */}
+                  <line x1={building.x} y1={building.y + building.height * 0.45} x2={building.x + building.width} y2={building.y + building.height * 0.45} stroke="#d1d5db" strokeWidth="1.5" strokeDasharray="3,2" />
+                  <line x1={building.x} y1={building.y + building.height * 0.55} x2={building.x + building.width} y2={building.y + building.height * 0.55} stroke="#d1d5db" strokeWidth="1.5" strokeDasharray="3,2" />
+
+                  {/* 세로 구역선 2개 */}
+                  <line x1={building.x + building.width / 3} y1={building.y} x2={building.x + building.width / 3} y2={building.y + building.height * 0.45} stroke="#d1d5db" strokeWidth="1" strokeDasharray="3,2" />
+                  <line x1={building.x + building.width * 2 / 3} y1={building.y} x2={building.x + building.width * 2 / 3} y2={building.y + building.height * 0.45} stroke="#d1d5db" strokeWidth="1" strokeDasharray="3,2" />
+                  <line x1={building.x + building.width / 3} y1={building.y + building.height * 0.55} x2={building.x + building.width / 3} y2={building.y + building.height} stroke="#d1d5db" strokeWidth="1" strokeDasharray="3,2" />
+                  <line x1={building.x + building.width * 2 / 3} y1={building.y + building.height * 0.55} x2={building.x + building.width * 2 / 3} y2={building.y + building.height} stroke="#d1d5db" strokeWidth="1" strokeDasharray="3,2" />
+
+                  {/* 소 개체 */}
+                  {getCattlePositions(building).map((pos, i) => (
+                    <g key={i}>
+                      {/* 소 (갈색 세로 타원) */}
+                      <ellipse cx={pos.x} cy={pos.y} rx="2.5" ry="4" fill="#8B4513" stroke="#654321" strokeWidth="0.5" />
+                      {/* 캡슐 센서 (초록 점) */}
+                      <circle cx={pos.x} cy={pos.y} r="0.8" fill="#10b981" />
+                    </g>
+                  ))}
+                </>
+              )}
+
               {/* 건물 라벨 */}
               <text
                 x={building.x + building.width / 2}
@@ -168,14 +221,20 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-gray-600">내부 {indoorSensors.length}개</span>
+            <span className="text-gray-600">고정 센서 {indoorSensors.length}개</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-blue-500" />
             <span className="text-gray-600">외부 기준선 {outdoorSensors.length}개</span>
           </div>
+          {(farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle') && (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-amber-700" />
+              <span className="text-gray-600">개체 캡슐 센서 {layout.buildings.filter(b => b.label.includes('우사')).length * (farm.size === 'large' ? 18 : 12)}개</span>
+            </div>
+          )}
         </div>
-        <span className="text-gray-500">총 {sensors.length}개 센서</span>
+        <span className="text-gray-500">총 {sensors.length + (farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle' ? layout.buildings.filter(b => b.label.includes('우사')).length * (farm.size === 'large' ? 18 : 12) : 0)}개 센서</span>
       </div>
     </Card>
   );
