@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { useState, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
 import { Farm, GAS_INFO, GasType, TimeRange } from '../../types';
 import { generateEmissionData } from '../../utils/dataGenerator';
 import { Card } from '../common';
@@ -13,6 +13,62 @@ export function EmissionChart({ farm }: EmissionChartProps) {
   const [selectedGas, setSelectedGas] = useState<GasType>('CH4');
 
   const data = generateEmissionData(farm, timeRange);
+
+  // 통계 계산
+  const stats = useMemo(() => {
+    if (!data || data.length === 0) return null;
+
+    const values = data.map(d => d[selectedGas] as number).filter(v => v !== undefined);
+    const currentValue = values[values.length - 1] || 0;
+    const previousValue = values[values.length - 2] || currentValue;
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+
+    // 최고/최저 지점 찾기
+    const maxIndex = values.indexOf(max);
+    const minIndex = values.indexOf(min);
+    const maxPoint = data[maxIndex];
+    const minPoint = data[minIndex];
+
+    // 비교 기간별 변화율 계산
+    let comparisonValue = 0;
+    let comparisonLabel = '';
+
+    if (timeRange === 'day') {
+      // 어제보다
+      comparisonValue = previousValue;
+      comparisonLabel = '어제보다';
+    } else if (timeRange === 'week') {
+      // 지난주보다 (7일 전 값)
+      comparisonValue = values[Math.max(0, values.length - 8)] || values[0];
+      comparisonLabel = '지난주보다';
+    } else if (timeRange === 'month') {
+      // 지난달보다 (30일 전 값)
+      comparisonValue = values[0] || currentValue;
+      comparisonLabel = '지난달보다';
+    } else {
+      // 작년보다
+      comparisonValue = values[0] || currentValue;
+      comparisonLabel = '작년보다';
+    }
+
+    const change = currentValue - comparisonValue;
+    const changePercent = comparisonValue === 0 ? 0 : (change / comparisonValue) * 100;
+
+    return {
+      current: currentValue,
+      min,
+      max,
+      avg,
+      change,
+      changePercent,
+      comparisonLabel,
+      maxPoint,
+      minPoint,
+    };
+  }, [data, selectedGas, timeRange]);
 
   const timeRanges: { value: TimeRange; label: string }[] = [
     { value: 'day', label: '오늘' },
@@ -30,20 +86,37 @@ export function EmissionChart({ farm }: EmissionChartProps) {
             <p className="text-sm text-gray-500 mt-0.5">시간별 온실가스 배출량 변화</p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {timeRanges.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => setTimeRange(value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  timeRange === value
-                    ? 'bg-gray-900 text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="flex items-center gap-4">
+            {/* 변화율 표시 */}
+            {stats && (
+              <div className="text-right">
+                <p className="text-xs text-gray-500">{stats.comparisonLabel}</p>
+                <p
+                  className={`text-base font-bold ${
+                    stats.changePercent > 0 ? 'text-red-600' : stats.changePercent < 0 ? 'text-blue-600' : 'text-gray-600'
+                  }`}
+                >
+                  {stats.changePercent > 0 ? '+' : ''}
+                  {stats.changePercent.toFixed(1)}%
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              {timeRanges.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setTimeRange(value)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    timeRange === value
+                      ? 'bg-gray-900 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -116,6 +189,42 @@ export function EmissionChart({ farm }: EmissionChartProps) {
                 stroke="#3b82f6"
                 strokeDasharray="3 3"
                 label={{ value: '평균', position: 'right', fill: '#3b82f6', fontSize: 12 }}
+              />
+            )}
+            {/* 최고점 표시 */}
+            {stats && stats.maxPoint && (
+              <ReferenceDot
+                x={stats.maxPoint.label}
+                y={stats.max}
+                r={6}
+                fill="#dc2626"
+                stroke="#fff"
+                strokeWidth={2}
+                label={{
+                  value: `최고 ${stats.max.toFixed(1)}`,
+                  position: 'top',
+                  fill: '#dc2626',
+                  fontSize: 11,
+                  offset: 10
+                }}
+              />
+            )}
+            {/* 최저점 표시 */}
+            {stats && stats.minPoint && (
+              <ReferenceDot
+                x={stats.minPoint.label}
+                y={stats.min}
+                r={6}
+                fill="#dc2626"
+                stroke="#fff"
+                strokeWidth={2}
+                label={{
+                  value: `최저 ${stats.min.toFixed(1)}`,
+                  position: 'bottom',
+                  fill: '#dc2626',
+                  fontSize: 11,
+                  offset: 10
+                }}
               />
             )}
           </LineChart>

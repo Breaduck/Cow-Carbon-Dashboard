@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { getAlertsByFarmId, reductionGuides } from '../../data';
+import { getAlertsByFarmId, reductionGuides, farms } from '../../data';
 import { Card, Modal, Button } from '../common';
 import { GAS_INFO } from '../../types';
+import { PerformanceCalendar } from './PerformanceCalendar';
 
 interface AlertListProps {
   farmId: string;
@@ -10,6 +11,7 @@ interface AlertListProps {
 export function AlertList({ farmId }: AlertListProps) {
   const alerts = getAlertsByFarmId(farmId).filter(a => !a.isResolved);
   const [showGuideModal, setShowGuideModal] = useState(false);
+  const farm = farms.find(f => f.id === farmId)!;
 
   return (
     <>
@@ -73,6 +75,11 @@ export function AlertList({ farmId }: AlertListProps) {
             </svg>
             배출량 절감 가이드 보기
           </Button>
+        </div>
+
+        {/* 월간 성과 캘린더 */}
+        <div className="p-4 border-t border-gray-100">
+          <PerformanceCalendar farm={farm} />
         </div>
       </Card>
 

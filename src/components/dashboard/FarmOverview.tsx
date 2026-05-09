@@ -102,7 +102,23 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
           </div>
 
           {/* 성과 메시지 */}
-          <div className={`mb-4 px-4 py-3 rounded-lg border-2 ${performanceMsg.color} font-medium text-sm`}>
+          <div
+            className={`mb-4 px-4 py-3 rounded-lg border-2 ${performanceMsg.color} font-medium text-sm transition-all`}
+            style={{
+              animation: performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
+                ? 'pulse-slow 3s ease-in-out infinite'
+                : performanceMsg.type === 'excellent' || performanceMsg.type === 'good'
+                ? 'pulse-slow 4s ease-in-out infinite'
+                : 'none',
+              boxShadow: performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
+                ? '0 0 20px rgba(239, 68, 68, 0.3)'
+                : performanceMsg.type === 'excellent'
+                ? '0 0 20px rgba(34, 197, 94, 0.3)'
+                : performanceMsg.type === 'good'
+                ? '0 0 20px rgba(59, 130, 246, 0.3)'
+                : 'none'
+            }}
+          >
             <span className="mr-2">{performanceMsg.icon}</span>
             {performanceMsg.message}
           </div>
@@ -117,9 +133,13 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
               <p className="text-sm font-semibold text-gray-900">{farm.livestock.headCount.toLocaleString()}두</p>
             </div>
             <div className="p-4 rounded-xl bg-gray-50">
-              <p className="text-xs text-gray-500 mb-1">농장규모</p>
+              <p className="text-xs text-gray-500 mb-1">인증일</p>
               <p className="text-sm font-semibold text-gray-900">
-                {farm.size === 'small' ? '소규모' : farm.size === 'medium' ? '중규모' : '대규모'}
+                {new Date(farm.certification.certifiedDate).toLocaleDateString('ko-KR', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
               </p>
             </div>
             <div className="p-4 rounded-xl" style={{ backgroundColor: farm.certification.grade === 'A' ? '#dcfce7' : farm.certification.grade === 'B' ? '#dbeafe' : '#fef3c7' }}>

@@ -153,18 +153,18 @@ export function generateFarms(): Farm[] {
     const headCount = random.nextInt(minHead, maxHead);
 
     // 센서 개수 (규모별 최적화)
-    // 소 우사: 모서리 4개 + 중앙 1개 = 5개가 기본
+    // 소 우사: 가운데 통로에 3개 (좌중우)
     // 외부 기준선: 동서남북 4개 고정
     const sensorCounts: Record<LivestockType, Record<FarmSize, number>> = {
       beef_cattle: {
-        small: 16,   // 우사1(5) + 우사2(5) + 분뇨(2) + 외부(4)
-        medium: 16,  // 우사1(5) + 우사2(5) + 분뇨(2) + 외부(4)
-        large: 16,   // 우사1(5) + 우사2(5) + 분뇨(2) + 외부(4)
+        small: 12,   // 우사1(3) + 우사2(3) + 분뇨(2) + 외부(4)
+        medium: 12,  // 우사1(3) + 우사2(3) + 분뇨(2) + 외부(4)
+        large: 12,   // 우사1(3) + 우사2(3) + 분뇨(2) + 외부(4)
       },
       dairy_cattle: {
-        small: 13,   // 착유실(2) + 착유우사(5) + 분뇨(2) + 외부(4)
-        medium: 13,  // 착유실(2) + 착유우사(5) + 분뇨(2) + 외부(4)
-        large: 13,   // 착유실(2) + 착유우사(5) + 분뇨(2) + 외부(4)
+        small: 11,   // 착유실(2) + 착유우사(3) + 분뇨(2) + 외부(4)
+        medium: 11,  // 착유실(2) + 착유우사(3) + 분뇨(2) + 외부(4)
+        large: 11,   // 착유실(2) + 착유우사(3) + 분뇨(2) + 외부(4)
       },
       pig: {
         small: 21,   // 분만(2) + 자돈(2) + 육성(2) + 비육1(3) + 비육2(3) + 분뇨(3) + 외부(4)
@@ -309,25 +309,33 @@ function generateLCAData(
   size: FarmSize,
   random: SeededRandom
 ): LCAData {
-  // 축종별 배출계수 (kg CO2eq/두/월) - IPCC 가이드라인 기준
+  // 축종별 배출계수 (kg CO2eq/두/월) - IPCC Tier 2 가이드라인 + 국내 연구 기준
+  // 반추동물(한우/젖소): 장내발효가 전체의 65-70% 차지
+  // 돼지: 분뇨 배출이 전체의 55-65% 차지
   const emissionFactors = {
     beef_cattle: {
-      livestock: 4.5,    // 가축 직접 배출 (장내발효 CH4): ~54 kg/year
-      manure: 1.2,       // 분뇨 배출: ~14 kg/year
+      livestock: 12.0,   // 가축 직접 배출 (장내발효 CH4): ~144 kg/year (전체의 68-72%)
+      manure: 3.2,       // 분뇨 배출 (N2O): ~38.4 kg/year (전체의 16-20%)
       feedPerHead: 300,  // 사료 kg/두/월
-      feedEmission: 0.8, // 사료 배출계수 kg CO2eq/kg
+      feedEmission: 0.005, // 사료 생산 과정 간접배출 (전체의 5-7%)
+      electricityFactor: 0.4,  // 전력 사용 배율 (전체의 2-3%)
+      fuelFactor: 0.3,         // 연료 사용 배율 (전체의 2-3%)
     },
     dairy_cattle: {
-      livestock: 5.8,    // ~70 kg/year
-      manure: 1.8,       // ~22 kg/year
+      livestock: 14.0,   // ~168 kg/year (전체의 65-68%, 착유우는 대사량 높음)
+      manure: 4.2,       // ~50.4 kg/year (전체의 18-21%)
       feedPerHead: 450,
-      feedEmission: 0.9,
+      feedEmission: 0.006, // 젖소는 사료 품질 높아 간접배출 약간 높음 (전체의 5-7%)
+      electricityFactor: 0.9,  // 착유 시설로 전력 사용 높음 (전체의 4-6%)
+      fuelFactor: 0.4,
     },
     pig: {
-      livestock: 0.12,   // ~1.5 kg/year (돼지는 장내발효 매우 적음)
-      manure: 0.5,       // ~6 kg/year
+      livestock: 0.5,    // ~6 kg/year (전체의 5-7%, 돼지는 장내발효 매우 적음)
+      manure: 5.5,       // ~66 kg/year (전체의 58-62%, 액상분뇨에서 메탄/아산화질소 대량 발생)
       feedPerHead: 90,
-      feedEmission: 0.7,
+      feedEmission: 0.004, // 사료 생산 과정 간접배출 (전체의 3-5%)
+      electricityFactor: 0.7,  // 환기/온도조절로 전력 사용 높음 (전체의 12-15%)
+      fuelFactor: 0.45,        // (전체의 8-10%)
     },
   };
 
@@ -340,14 +348,14 @@ function generateLCAData(
   // 투입량 계산
   const feedAmount = Math.round(factor.feedPerHead * headCount);
 
-  // 규모별 전력/연료 사용량
+  // 규모별 + 축종별 전력/연료 사용량
   const sizeMultiplier = size === 'small' ? 1 : size === 'medium' ? 2.5 : 5;
-  const electricityUsage = Math.round((500 + headCount * 2) * sizeMultiplier);
-  const dieselUsage = Math.round((30 + headCount * 0.3) * sizeMultiplier);
-  const lpgUsage = Math.round((20 + headCount * 0.2) * sizeMultiplier);
+  const electricityUsage = Math.round((150 + headCount * 0.8) * sizeMultiplier * factor.electricityFactor);
+  const dieselUsage = Math.round((15 + headCount * 0.15) * sizeMultiplier * factor.fuelFactor);
+  const lpgUsage = Math.round((10 + headCount * 0.1) * sizeMultiplier * factor.fuelFactor);
 
   // 간접 배출 계산
-  // 사료: 사료량 × 배출계수
+  // 사료: 사료 생산 과정의 간접배출만 (비료, 기계 사용 등)
   const feedEmission = Math.round(feedAmount * factor.feedEmission);
 
   // 전력: kWh × 0.4563 kg CO2eq/kWh (한국 전력 배출계수)
@@ -357,8 +365,9 @@ function generateLCAData(
   // LPG: kg × 3.0 kg CO2eq/kg
   const fuelEmission = Math.round(dieselUsage * 2.68 + lpgUsage * 3.0);
 
-  // 기타 (비료, 약품 등): 전체의 약 5%
-  const otherEmission = Math.round((feedEmission + electricityEmission + fuelEmission) * 0.05);
+  // 기타 (비료, 약품, 수도, 세척제 등): 직접배출의 약 2%
+  const totalDirect = directLivestock + directManure;
+  const otherEmission = Math.round(totalDirect * 0.02);
 
   return {
     directEmissions: {
@@ -549,20 +558,20 @@ function calculateEmissionMeasurementPositions(
   };
 
   // 축종별 센서 배치
-  // 소 우사: 모서리 4개 + 중앙 1개 = 5개 (모든 규모 동일)
+  // 소 우사: 가운데 통로에 3개 (모서리 제거)
   if (livestock === 'beef_cattle') {
     const coords = buildingCoords.beef_cattle;
-    // 우사 1동, 2동: 각각 모서리 4개 + 중앙 1개 = 5개
-    addSensorsToBuilding(coords.barn1, 5);
-    addSensorsToBuilding(coords.barn2, 5);
+    // 우사 1동, 2동: 각각 가운데 통로에 3개 (좌중우)
+    addSensorsToBuilding(coords.barn1, 3);
+    addSensorsToBuilding(coords.barn2, 3);
     // 분뇨처리장: 2개
     addSensorsToBuilding(coords.manure, 2);
   } else if (livestock === 'dairy_cattle') {
     const coords = buildingCoords.dairy_cattle;
     // 착유실: 2개
     addSensorsToBuilding(coords.milking, 2);
-    // 착유우사: 모서리 4개 + 중앙 1개 = 5개
-    addSensorsToBuilding(coords.barn, 5);
+    // 착유우사: 가운데 통로에 3개 (좌중우)
+    addSensorsToBuilding(coords.barn, 3);
     // 분뇨처리장: 2개
     addSensorsToBuilding(coords.manure, 2);
   } else if (livestock === 'pig') {

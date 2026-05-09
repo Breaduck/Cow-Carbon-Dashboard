@@ -80,7 +80,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
     if (!building.label.includes('우사')) return [];
 
     const positions: Array<{ x: number; y: number }> = [];
-    const cattlePerZone = farm.size === 'large' ? 3 : 2;
+    const cattlePerZone = 2; // 모든 규모에서 구역당 2마리로 통일
     const zoneWidth = building.width / 3;
     const spacing = zoneWidth / (cattlePerZone + 1);
     const padding = 3; // 여백

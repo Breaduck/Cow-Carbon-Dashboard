@@ -45,6 +45,7 @@ const mapOptions = {
   mapTypeControl: false,
   streetViewControl: false,
   fullscreenControl: true,
+  gestureHandling: 'greedy',
   styles: [
     {
       featureType: 'poi',
@@ -64,17 +65,13 @@ export function MapPage() {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [mapZoom, setMapZoom] = useState(7);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showStats, setShowStats] = useState(true);
 
-  // 지도에 표시할 농장 (필터가 없으면 아무것도 표시 안 함)
-  const hasFilters = filters.sido.length > 0 || filters.livestock.length > 0 || filters.grade.length > 0 || searchQuery.length > 0;
+  // 지도에 표시할 농장
+  const hasActiveFilters = filters.sido.length > 0 || filters.livestock.length > 0 || filters.grade.length > 0 || searchQuery.length > 0;
 
   // 검색어 필터링 추가
   const displayFarms = useMemo(() => {
-    // 필터가 하나도 없으면 빈 배열 반환
-    if (!hasFilters) {
-      return [];
-    }
-
     let result = filteredFarms;
 
     if (searchQuery) {
@@ -87,7 +84,7 @@ export function MapPage() {
     }
 
     return result;
-  }, [hasFilters, filteredFarms, farms, searchQuery]);
+  }, [filteredFarms, farms, searchQuery]);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey || 'dummy-key-to-prevent-error',
@@ -251,61 +248,92 @@ export function MapPage() {
   return (
     <div className="h-full flex flex-col">
       {/* 검색바 */}
-      <div className="p-4 bg-white border-b border-gray-200">
-        <div className="relative">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="농장명, 농장주명, 지역 검색..."
-            className="w-full px-4 py-2.5 pl-10 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
-          />
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
+      <div className="px-4 py-2 bg-white border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="농장명, 농장주명, 지역 검색..."
+              className="w-full px-3 py-1.5 pl-8 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-xs"
+            />
+            <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => setShowStats(!showStats)}
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 transition-colors flex items-center gap-1"
+          >
+            {showStats ? (
+              <>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+                숨기기
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                보기
+              </>
+            )}
+          </button>
         </div>
       </div>
 
       {/* 상단 통계 카드 */}
-      <div className="p-4 bg-white border-b border-gray-200">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard
-            title="전체 인증 농장"
-            value={dashboardStats.totalFarms}
-            unit="개"
-            color="green"
-            icon={
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-            }
-          />
-          {livestockStats.map(stat => (
+      {showStats && (
+        <div className="p-3 bg-white border-b border-gray-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard
-              key={stat.type}
-              title={stat.nameKo}
-              value={stat.count}
-              unit="농장"
-              color={
-                stat.type === 'beef_cattle' ? 'yellow' :
-                stat.type === 'dairy_cattle' ? 'blue' : 'red'
+              title="전체 인증 농장"
+              value={dashboardStats.totalFarms}
+              unit="개"
+              color="green"
+              icon={
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
               }
-              icon={<span className="text-2xl">{stat.icon}</span>}
-              onClick={() => handleLivestockClick(stat.type)}
+              onClick={() => {
+                // 모든 필터 초기화하여 전체 농장 표시
+                setFilter('livestock', []);
+                setFilter('grade', []);
+                setFilter('sido', []);
+                setSearchQuery('');
+              }}
             />
-          ))}
+            {livestockStats.map(stat => (
+              <StatCard
+                key={stat.type}
+                title={stat.nameKo}
+                value={stat.count}
+                unit="농장"
+                color={
+                  stat.type === 'beef_cattle' ? 'yellow' :
+                  stat.type === 'dairy_cattle' ? 'blue' : 'red'
+                }
+                icon={<span className="text-2xl">{stat.icon}</span>}
+                onClick={() => handleLivestockClick(stat.type)}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 필터 상태 표시 */}
       {(filters.livestock.length > 0 || filters.grade.length > 0 || filters.sido.length > 0 || searchQuery) && (

@@ -11,7 +11,7 @@ function calculateComparison(current: number, previous: number): Omit<LCACompari
   const changeAmount = current - previous;
   const changePercentage = previous === 0 ? 0 : (changeAmount / previous) * 100;
   const trend: TrendDirection =
-    Math.abs(changePercentage) < 2 ? 'stable' :
+    Math.abs(changePercentage) < 0.5 ? 'stable' :
     changePercentage > 0 ? 'up' : 'down';
 
   return {
@@ -74,7 +74,7 @@ function generateImprovementSuggestions(
       category: 'fuel',
       severity: fuelIncrease > previous.indirectEmissions.fuel * 0.1 ? 'high' : 'low',
       title: `${periodLabel} 대비 연료 소모량 ${Math.abs(fuelUsagePercent).toFixed(0)}% 증가 - ${actionDeadline} 점검 필요`,
-      description: `연료 배출량 ${increasePercent}% 증가 (${fuelIncrease.toLocaleString()}kg CO₂eq ↑)\n경유/LPG 사용량: ${totalFuelIncrease.toFixed(0)}L/kg 증가`,
+      description: `연료 배출량 ${increasePercent}% 증가 (${fuelIncrease.toLocaleString()}kg CO₂eq ↑)\n경유/LPG 사용량: ${Math.round(totalFuelIncrease).toLocaleString()}L/kg 증가`,
       expectedReduction: fuelIncrease * 0.2,
       actions: [
         `${actionDeadline} 난방기 설정온도 1-2도 낮추기`,
@@ -190,7 +190,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
   const emissionScore = Math.min(70, Math.max(0, (reductionRate / 18) * 70)); // 18% 감축 시 70점
 
   const categories = [
-    { name: '가축 배출', value: directEmissions.livestock * periodMultiplier, prev: previousData.directEmissions.livestock * periodMultiplier, color: '#FF6B6B', type: 'direct' },
+    { name: '장내 발효', value: directEmissions.livestock * periodMultiplier, prev: previousData.directEmissions.livestock * periodMultiplier, color: '#FF6B6B', type: 'direct', tooltip: '가축 소화기관 메탄 발생' },
     { name: '분뇨 배출', value: directEmissions.manure * periodMultiplier, prev: previousData.directEmissions.manure * periodMultiplier, color: '#FA8072', type: 'direct' },
     { name: '전력', value: indirectEmissions.electricity * periodMultiplier, prev: previousData.indirectEmissions.electricity * periodMultiplier, color: '#95E1D3', type: 'indirect' },
     { name: '연료', value: indirectEmissions.fuel * periodMultiplier, prev: previousData.indirectEmissions.fuel * periodMultiplier, color: '#FFE66D', type: 'indirect' },
@@ -213,13 +213,20 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
   // 트렌드 아이콘
   const TrendIcon = ({ trend, changePercentage }: { trend: TrendDirection; changePercentage: number }) => {
+    const absPercent = Math.abs(changePercentage);
+
+    // 0%일 때는 화살표 없이 표시
+    if (absPercent === 0) {
+      return <span className="text-gray-600">0.0%</span>;
+    }
+
     if (trend === 'stable') {
-      return <span className="text-gray-500">-</span>;
+      return <span className="text-gray-600">→ {absPercent.toFixed(1)}%</span>;
     }
     const isNegative = trend === 'down';
     return (
       <span className={isNegative ? 'text-green-600' : 'text-red-600'}>
-        {isNegative ? '▼' : '▲'} {Math.abs(changePercentage).toFixed(1)}%
+        {isNegative ? '▼' : '▲'} {absPercent.toFixed(1)}%
       </span>
     );
   };
@@ -253,16 +260,16 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       </div>
 
       {/* 총 배출량 비교 카드 */}
-      <div className="mb-6 p-5 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200">
+      <div className="mb-6 p-6 rounded-xl bg-gray-100 border border-gray-200">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-base font-medium text-primary-700 mb-2">총 탄소배출량 ({periodTitles[period]})</p>
-            <p className="text-4xl font-bold text-primary-900">
+            <p className="text-lg font-semibold text-gray-700 mb-3">총 탄소배출량 ({periodTitles[period]})</p>
+            <p className="text-5xl font-bold text-green-700">
               {totalEmissions.toFixed(0).toLocaleString()}
-              <span className="text-xl ml-2">kg CO₂eq</span>
+              <span className="text-2xl ml-2">kg CO₂eq</span>
             </p>
             <div className="mt-3 flex items-center gap-2">
-              <span className="text-sm text-primary-600">{periodLabels[period]} 대비</span>
+              <span className="text-sm text-gray-600">{periodLabels[period]} 대비</span>
               <span className="text-base font-semibold">
                 <TrendIcon trend={totalComparison.trend} changePercentage={totalComparison.changePercentage} />
               </span>
@@ -270,8 +277,8 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
           </div>
           <div className="text-right">
             <div className="mb-4">
-              <p className="text-sm text-primary-600 mb-1">직접 배출</p>
-              <p className="text-2xl font-bold text-primary-800">{totalDirect.toFixed(0).toLocaleString()}</p>
+              <p className="text-sm text-gray-600 mb-1">직접 배출</p>
+              <p className="text-2xl font-bold text-gray-800">{totalDirect.toFixed(0).toLocaleString()}</p>
               <span className="text-sm">
                 <TrendIcon trend={directComparison.trend} changePercentage={directComparison.changePercentage} />
               </span>
@@ -320,69 +327,76 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
             </svg>
             개선 제안 ({suggestions.length}개)
           </h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {suggestions.map((suggestion, idx) => {
-              const categoryIcons = {
-                electricity: '⚡',
-                fuel: '🔥',
-                manure: '♻️',
-                livestock: '🐄',
-              };
-
-              const severityColors = {
-                high: 'border-red-300 bg-gradient-to-br from-red-50 to-red-100',
-                medium: 'border-orange-300 bg-gradient-to-br from-orange-50 to-orange-100',
-                low: 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-yellow-100',
+              const severityStyles = {
+                high: {
+                  bg: 'bg-white',
+                  border: 'border-red-200',
+                  badge: 'bg-red-50 text-red-700',
+                  text: 'text-gray-900',
+                },
+                medium: {
+                  bg: 'bg-white',
+                  border: 'border-orange-200',
+                  badge: 'bg-orange-50 text-orange-700',
+                  text: 'text-gray-900',
+                },
+                low: {
+                  bg: 'bg-white',
+                  border: 'border-gray-200',
+                  badge: 'bg-gray-100 text-gray-700',
+                  text: 'text-gray-900',
+                },
               };
 
               const severityBadge = {
-                high: { label: '긴급', color: 'bg-red-600' },
-                medium: { label: '권장', color: 'bg-orange-600' },
-                low: { label: '참고', color: 'bg-yellow-600' },
+                high: '긴급',
+                medium: '권장',
+                low: '참고',
               };
+
+              const style = severityStyles[suggestion.severity];
 
               return (
                 <button
                   key={idx}
                   onClick={() => setSelectedSuggestion(suggestion)}
-                  className={`p-4 rounded-xl border-2 ${severityColors[suggestion.severity]} hover:shadow-lg transition-all text-left group cursor-pointer relative overflow-hidden`}
+                  className={`p-6 rounded-2xl border-2 ${style.border} ${style.bg} hover:shadow-lg hover:scale-[1.02] transition-all text-left cursor-pointer relative`}
                 >
                   {/* 심각도 배지 */}
-                  <div className="absolute top-2 right-2">
-                    <span className={`text-xs px-2 py-1 rounded-full text-white font-semibold ${severityBadge[suggestion.severity].color}`}>
-                      {severityBadge[suggestion.severity].label}
+                  <div className="mb-4">
+                    <span className={`text-xs px-3 py-1.5 rounded-full font-semibold ${style.badge}`}>
+                      {severityBadge[suggestion.severity]}
                     </span>
                   </div>
 
-                  {/* 아이콘 */}
-                  <div className="text-4xl mb-3">
-                    {categoryIcons[suggestion.category]}
-                  </div>
-
                   {/* 제목 */}
-                  <h5 className="text-base font-bold text-gray-900 mb-2 pr-12 line-clamp-3 group-hover:text-primary-700 transition-colors leading-snug">
-                    {suggestion.title}
+                  <h5 className={`text-lg font-bold mb-3 leading-tight ${style.text}`}>
+                    {suggestion.title.split(' - ').map((part, i) => (
+                      <span key={i}>
+                        {i > 0 && (
+                          <span className="block mt-2 text-xl font-extrabold text-red-600">
+                            {part}
+                          </span>
+                        )}
+                        {i === 0 && part}
+                      </span>
+                    ))}
                   </h5>
 
                   {/* 감축 가능량 */}
                   {suggestion.expectedReduction > 0 && (
-                    <div className="flex items-center gap-2 mt-3">
-                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                      </svg>
-                      <span className="text-sm font-bold text-green-700">
-                        즉시 조치 시 최대 {suggestion.expectedReduction.toFixed(0)}kg 감축 가능
-                      </span>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <p className="text-sm font-semibold text-green-600">
+                        ↓ 최대 {suggestion.expectedReduction.toLocaleString()}kg 감축 가능
+                      </p>
                     </div>
                   )}
 
                   {/* 클릭 힌트 */}
-                  <div className="mt-3 text-xs text-gray-500 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    자세히 보기
+                  <div className="mt-4 text-xs text-gray-400">
+                    자세히 보기 →
                   </div>
                 </button>
               );
@@ -426,13 +440,19 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                     </span>
                   </div>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2">
+                <div className="w-full bg-gray-100 rounded-full h-2 relative">
                   <div
                     className="h-2 rounded-full transition-all duration-500"
                     style={{
                       width: `${barWidth}%`,
                       backgroundColor: category.color,
                     }}
+                  />
+                  {/* 적정 배출량 기준선 (전체의 80%) */}
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5 bg-gray-400 cursor-help"
+                    style={{ left: '80%' }}
+                    title="적정 배출량 기준선 (80%)"
                   />
                 </div>
               </div>
@@ -517,7 +537,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                   <div>
                     <p className="text-sm text-green-700 font-medium">즉시 조치 시 최대 감축 가능량</p>
                     <p className="text-2xl font-bold text-green-900">
-                      {selectedSuggestion.expectedReduction.toFixed(0)} kg CO₂eq
+                      {Math.round(selectedSuggestion.expectedReduction).toLocaleString()} kg CO₂eq
                     </p>
                     <p className="text-xs text-green-600 mt-1">아래 실행 방법을 따르면 이 정도 감축 효과를 기대할 수 있습니다</p>
                   </div>

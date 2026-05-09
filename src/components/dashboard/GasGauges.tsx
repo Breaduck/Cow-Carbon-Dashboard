@@ -151,39 +151,20 @@ export function GasGauges({ farm }: GasGaugesProps) {
                   }}
                 />
 
-                {/* 기준선 (60% - 주의 시작점) */}
-                <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-yellow-600"
-                  style={{ left: '60%' }}
-                >
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-yellow-600 rounded-full" />
-                </div>
-
                 {/* 경고선 (80% - 경고 시작점) */}
                 <div
                   className="absolute top-0 bottom-0 w-0.5 bg-red-600"
                   style={{ left: '80%' }}
-                >
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-600 rounded-full" />
-                </div>
+                  title="경고 기준선 (80%)"
+                />
               </div>
 
-              <div className="flex items-center justify-between mt-2">
+              <div className="mt-2">
                 <p className="text-xs font-medium" style={{
                   color: percentage < 60 ? '#16a34a' : percentage < 80 ? '#ca8a04' : '#dc2626'
                 }}>
                   {percentage < 60 ? '✓ 정상' : percentage < 80 ? '⚠ 주의' : '🚨 경고'}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <div className="w-1 h-3 bg-yellow-600" />
-                    주의
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <div className="w-1 h-3 bg-red-600" />
-                    경고
-                  </span>
-                </div>
               </div>
             </div>
           );
