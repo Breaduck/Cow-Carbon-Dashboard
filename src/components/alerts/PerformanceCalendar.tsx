@@ -154,7 +154,7 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
     } else {
       return {
         icon: '😊',
-        message: '평범한 한 달이에요. 조금만 더 노력하면 더 좋아질 거예요',
+        message: '잘하고 있어요. 이 상태를 유지하면 목표 달성할 수 있어요',
         color: 'text-yellow-700 bg-yellow-50 border-yellow-500'
       };
     }
