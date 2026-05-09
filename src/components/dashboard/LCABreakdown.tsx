@@ -217,11 +217,11 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
     // 0%일 때는 화살표 없이 표시
     if (absPercent === 0) {
-      return <span className="text-gray-600">0.0%</span>;
+      return <span className="text-green-600">0.0%</span>;
     }
 
     if (trend === 'stable') {
-      return <span className="text-gray-600">→ {absPercent.toFixed(1)}%</span>;
+      return <span className="text-green-600">→ {absPercent.toFixed(1)}%</span>;
     }
     const isNegative = trend === 'down';
     return (
