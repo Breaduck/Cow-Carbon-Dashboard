@@ -183,11 +183,15 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
     [farm.lcaData, previousData, period]
   );
 
-  // 인증 목표 계산 (돼지 기준)
+  // 인증 목표 계산 (돼지 기준, 월간 기준으로 통일)
   const targetEmissionPerKg = 2.13; // kg CO2eq/kg 도체중
-  const targetEmissionTotal = targetEmissionPerKg * farm.carcassWeight;
-  const currentEmissionPerKg = totalEmissions / farm.carcassWeight;
-  const targetAchievementRate = (targetEmissionTotal / totalEmissions) * 100;
+
+  // 현재 배출량을 월간으로 환산
+  const monthlyEmissions = totalEmissions / periodMultiplier;
+  const currentEmissionPerKg = monthlyEmissions / farm.carcassWeight;
+
+  // 목표 대비 현재 배출량 비율 (100% 이하면 목표 달성, 최대 200%까지 표시)
+  const targetAchievementRate = Math.min(200, (currentEmissionPerKg / targetEmissionPerKg) * 100);
 
   // 인증 점수 계산 (간단 버전)
   const reductionRate = ((2.60 - currentEmissionPerKg) / 2.60) * 100;
@@ -299,23 +303,31 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
         {/* 목표 달성도 */}
         {farm.livestock.type === 'pig' && (
-          <div className="pt-3 border-t border-primary-200">
+          <div className="pt-3 border-t border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-primary-700">인증 목표 달성도</span>
-              <span className="text-sm font-bold text-primary-900">
+              <span className="text-xs text-gray-700">목표 대비 배출 비율</span>
+              <span className={`text-sm font-bold ${targetAchievementRate <= 100 ? 'text-green-600' : 'text-orange-600'}`}>
                 {targetAchievementRate.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-primary-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-2 relative">
               <div
-                className="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-primary-500 to-primary-600"
+                className={`h-2 rounded-full transition-all duration-500 ${
+                  targetAchievementRate <= 100
+                    ? 'bg-gradient-to-r from-green-500 to-green-600'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600'
+                }`}
                 style={{ width: `${Math.min(100, targetAchievementRate)}%` }}
               />
+              {/* 100% 기준선 */}
+              {targetAchievementRate > 100 && (
+                <div className="absolute top-0 bottom-0 w-0.5 bg-gray-500" style={{ left: '100%' }} title="목표선" />
+              )}
             </div>
-            <div className="flex justify-between mt-1 text-xs text-primary-600">
-              <span>목표: {currentEmissionPerKg.toFixed(2)} / {targetEmissionPerKg} kg CO₂eq/kg</span>
+            <div className="flex justify-between mt-1 text-xs text-gray-600">
+              <span>현재: {currentEmissionPerKg.toFixed(2)} / 목표: {targetEmissionPerKg} kg CO₂eq/kg</span>
               <span className={emissionScore >= 63 ? 'text-green-600 font-semibold' : 'text-orange-600'}>
-                배출량 점수: {emissionScore.toFixed(1)}/70점
+                점수: {emissionScore.toFixed(1)}/70
               </span>
             </div>
           </div>
