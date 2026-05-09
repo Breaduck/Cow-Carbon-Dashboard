@@ -62,7 +62,7 @@ export function MapPage() {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
   const [inputKey, setInputKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(!apiKey);
-  const [mapCenter, setMapCenter] = useState(defaultCenter);
+  const [mapCenter] = useState(defaultCenter);
   const [mapZoom] = useState(7);
   const [searchQuery, setSearchQuery] = useState('');
   const [showStats, setShowStats] = useState(true);
