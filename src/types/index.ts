@@ -63,6 +63,89 @@ export interface Sensor {
   };
 }
 
+// 비교 주기
+export type ComparisonPeriod = 'daily' | 'weekly' | 'monthly';
+
+// LCA(전과정평가) 데이터
+export interface LCAData {
+  // 직접 배출 (센서 측정)
+  directEmissions: {
+    livestock: number;    // 가축 배출 (kg CO2eq/월)
+    manure: number;       // 분뇨 배출 (kg CO2eq/월)
+  };
+  // 간접 배출 (투입재 기반 계산)
+  indirectEmissions: {
+    feed: number;         // 사료 (kg CO2eq/월)
+    electricity: number;  // 전력 (kg CO2eq/월)
+    fuel: number;         // 연료 (kg CO2eq/월)
+    other: number;        // 기타 (kg CO2eq/월)
+  };
+  // 월간 투입량
+  monthlyInputs: {
+    feedAmount: number;       // 사료량 (kg)
+    electricityUsage: number; // 전력 사용량 (kWh)
+    dieselUsage: number;      // 경유 사용량 (L)
+    lpgUsage: number;         // LPG 사용량 (kg)
+  };
+}
+
+// LCA 과거 데이터
+export interface LCAHistoricalData {
+  yesterday: LCAData;
+  lastWeek: LCAData;
+  lastMonth: LCAData;
+}
+
+// 트렌드 방향
+export type TrendDirection = 'up' | 'down' | 'stable';
+
+// LCA 비교 결과
+export interface LCAComparison {
+  period: ComparisonPeriod;
+  previousValue: number;
+  currentValue: number;
+  changeAmount: number;
+  changePercentage: number;
+  trend: TrendDirection;
+}
+
+// 배출량 비교 상세
+export interface EmissionComparison {
+  total: LCAComparison;
+  directTotal: LCAComparison;
+  indirectTotal: LCAComparison;
+  breakdown: {
+    livestock: LCAComparison;
+    manure: LCAComparison;
+    feed: LCAComparison;
+    electricity: LCAComparison;
+    fuel: LCAComparison;
+    other: LCAComparison;
+  };
+}
+
+// 개선 제안
+export interface ImprovementSuggestion {
+  category: 'feed' | 'electricity' | 'fuel' | 'manure' | 'livestock';
+  severity: 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  expectedReduction: number; // kg CO2eq
+  actions: string[];
+  relatedTechnology?: string; // 감축 기술명
+}
+
+// 인증 점수
+export interface CertificationScore {
+  emissionScore: number;       // 가산정 탄소배출량 점수 (70점 만점)
+  nonQuantifiableScore: number; // 비계량 기술 점수 (30점 만점)
+  totalScore: number;           // 총점 (100점 만점)
+  targetEmission: number;       // 목표 배출량 (kg CO2eq/kg 도체중)
+  currentEmission: number;      // 현재 배출량 (kg CO2eq/kg 도체중)
+  reductionRate: number;        // 감축률 (%)
+  certified: boolean;           // 인증 가능 여부 (75점 이상)
+}
+
 // 농장
 export interface Farm {
   id: string;
@@ -74,7 +157,10 @@ export interface Farm {
   certification: Certification;
   sensors: string[]; // Sensor IDs
   createdAt: string;
-  monthlyTarget: Record<GasType, number>; // kg CO2eq
+  monthlyTarget: Record<GasType, number>; // kg CO2eq (직접 배출 목표)
+  lcaData: LCAData; // 전과정평가 데이터
+  lcaHistory: LCAHistoricalData; // 과거 데이터
+  carcassWeight: number; // 도체중 (kg) - 목표 배출량 계산용
 }
 
 // 배출 데이터 포인트

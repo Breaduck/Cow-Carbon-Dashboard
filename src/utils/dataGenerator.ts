@@ -1,7 +1,6 @@
 import {
   Farm,
   Sensor,
-  EmissionDataPoint,
   Alert,
   ReductionGuide,
   LivestockType,
@@ -12,7 +11,6 @@ import {
   AlertSeverity,
   TimeRange,
   ChartDataPoint,
-  SIDO_LIST,
   LCAData,
   LCAHistoricalData,
 } from '../types';
@@ -140,7 +138,6 @@ export function generateFarms(): Farm[] {
       const i = farmIdCounter - 1;
 
     // 규모별 사육두수 범위
-    const sizes: FarmSize[] = ['small', 'medium', 'large'];
     const sizeWeights = livestock === 'pig' ? [0.3, 0.4, 0.3] : [0.4, 0.4, 0.2];
     const sizeRoll = random.next();
     const size: FarmSize = sizeRoll < sizeWeights[0] ? 'small' :
@@ -254,8 +251,6 @@ export function generateSensors(farms: Farm[]): Sensor[] {
   const random = new SeededRandom(123);
 
   for (const farm of farms) {
-    const sensorCount = farm.sensors.length;
-
     // 농장 크기와 축종에 따른 센서 배치 (실제 건물 내부 + 외부 기준선)
     const sensorPositions = calculateEmissionMeasurementPositions(farm.livestock.type, farm.size);
 
@@ -469,7 +464,7 @@ function generateHistoricalLCAData(
 // 메탄(CH4): 가축 상부, 암모니아(NH3): 가축 높이 근처
 function calculateEmissionMeasurementPositions(
   livestock: LivestockType,
-  size: FarmSize
+  _size: FarmSize
 ): Array<{ x: number; y: number; zone: string; isOutdoor: boolean }> {
   const positions: Array<{ x: number; y: number; zone: string; isOutdoor: boolean }> = [];
 

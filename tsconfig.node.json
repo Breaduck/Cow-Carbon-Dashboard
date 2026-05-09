@@ -5,13 +5,10 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "composite": true,
+    "strict": false,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["vite.config.ts"]

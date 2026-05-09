@@ -1,9 +1,9 @@
 import { useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleMap, useJsApiLoader, MarkerF, MarkerClustererF, InfoWindowF } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
 import { useStore } from '../store/useStore';
 import { StatCard } from '../components/common';
-import { LIVESTOCK_INFO, Farm } from '../types';
+import { LIVESTOCK_INFO, Farm, LivestockType } from '../types';
 import { dashboardStats } from '../data';
 
 const STORAGE_KEY = 'google_maps_api_key';

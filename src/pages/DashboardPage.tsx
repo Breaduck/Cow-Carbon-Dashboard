@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { FarmOverview } from '../components/dashboard/FarmOverview';
+import { LCABreakdown } from '../components/dashboard/LCABreakdown';
 import { FloorPlanView } from '../components/dashboard/FloorPlanView';
 import { GasGauges } from '../components/dashboard/GasGauges';
 import { EmissionChart } from '../components/charts/EmissionChart';
@@ -39,6 +40,8 @@ export function DashboardPage() {
     <div className="h-full overflow-y-auto">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <FarmOverview farm={selectedFarm} />
+
+        <LCABreakdown farm={selectedFarm} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FloorPlanView farm={selectedFarm} />
