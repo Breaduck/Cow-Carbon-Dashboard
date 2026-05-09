@@ -74,6 +74,7 @@ export function GasGauges({ farm }: GasGaugesProps) {
 
   return (
     <Card title="실시간 가스 농도" padding="lg">
+      <p className="text-xs text-gray-500 mb-4">최근 1시간 평균</p>
       {/* 인사이트 알림 */}
       {insights.length > 0 && (
         <div className="mb-4 space-y-2">
@@ -137,7 +138,8 @@ export function GasGauges({ farm }: GasGaugesProps) {
                 </div>
               </div>
 
-              <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="relative h-3 bg-gray-200 rounded-full overflow-visible">
+                {/* 현재 수치 바 */}
                 <div
                   className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000"
                   style={{
@@ -145,11 +147,41 @@ export function GasGauges({ farm }: GasGaugesProps) {
                     backgroundColor: info.color,
                   }}
                 />
+
+                {/* 기준선 (60% - 주의 시작점) */}
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-yellow-600"
+                  style={{ left: '60%' }}
+                >
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-yellow-600 rounded-full" />
+                </div>
+
+                {/* 경고선 (80% - 경고 시작점) */}
+                <div
+                  className="absolute top-0 bottom-0 w-0.5 bg-red-600"
+                  style={{ left: '80%' }}
+                >
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-600 rounded-full" />
+                </div>
               </div>
 
-              <p className="text-xs text-gray-500 mt-2">
-                {percentage < 60 ? '정상' : percentage < 80 ? '주의' : '경고'}
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs font-medium" style={{
+                  color: percentage < 60 ? '#16a34a' : percentage < 80 ? '#ca8a04' : '#dc2626'
+                }}>
+                  {percentage < 60 ? '✓ 정상' : percentage < 80 ? '⚠ 주의' : '🚨 경고'}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <div className="w-1 h-3 bg-yellow-600" />
+                    주의
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-1 h-3 bg-red-600" />
+                    경고
+                  </span>
+                </div>
+              </div>
             </div>
           );
         })}
