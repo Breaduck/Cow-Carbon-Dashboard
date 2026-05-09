@@ -280,32 +280,43 @@ export function MapPage() {
         </div>
       </div>
 
-      {/* 지역 선택 */}
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <div className="flex items-center gap-2 mb-2">
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      {/* 인증농장 현황 (지역별) */}
+      <div className="px-4 py-4 bg-white border-b border-gray-200">
+        <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+          <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
-          <span className="text-sm font-semibold text-gray-700">지역별 조회</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
+          인증농장 현황
+        </h3>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
           {Object.keys(REGION_CENTERS).map(region => {
             const isSelected = filters.sido.includes(region);
             const regionShortName = region.replace(/특별시|광역시|특별자치시|특별자치도|도$/g, '');
             const regionFarms = farms.filter(f => f.location.sido === region);
+            const count = regionFarms.length;
 
             return (
               <button
                 key={region}
                 onClick={() => handleRegionClick(region)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`p-2 rounded-lg border transition-all text-center ${
                   isSelected
-                    ? 'bg-primary-600 text-white shadow-md scale-105'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400 hover:bg-primary-50'
+                    ? 'bg-primary-600 border-primary-600 text-white shadow-md'
+                    : count > 0
+                    ? 'bg-white border-gray-200 hover:border-primary-400 hover:bg-primary-50'
+                    : 'bg-gray-50 border-gray-100 opacity-50 cursor-not-allowed'
                 }`}
+                disabled={count === 0}
               >
-                {regionShortName} ({regionFarms.length})
+                <div className={`text-xs font-medium mb-1 ${isSelected ? 'text-white' : 'text-gray-600'}`}>
+                  {regionShortName}
+                </div>
+                <div className={`text-lg font-bold ${isSelected ? 'text-white' : count > 0 ? 'text-primary-600' : 'text-gray-400'}`}>
+                  {count}
+                </div>
+                <div className={`text-xs ${isSelected ? 'text-primary-100' : 'text-gray-500'}`}>
+                  농장
+                </div>
               </button>
             );
           })}

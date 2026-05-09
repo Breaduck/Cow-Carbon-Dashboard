@@ -33,26 +33,6 @@ function generateImprovementSuggestions(
 
   const periodLabel = period === 'daily' ? '어제' : period === 'weekly' ? '지난주' : '전월';
 
-  // 사료 배출 증가 체크
-  const feedIncrease = current.indirectEmissions.feed - previous.indirectEmissions.feed;
-  if (feedIncrease > 0) {
-    const increasePercent = ((feedIncrease / previous.indirectEmissions.feed) * 100).toFixed(1);
-    suggestions.push({
-      category: 'feed',
-      severity: feedIncrease > previous.indirectEmissions.feed * 0.1 ? 'high' : 'medium',
-      title: `사료 배출량 ${increasePercent}% 증가`,
-      description: `${periodLabel} 대비 사료 관련 배출량이 ${feedIncrease.toLocaleString()}kg CO₂eq 증가했습니다. 사료량이 아닌 "질소저감 사료 급여" 적용 여부가 인증 기준입니다.`,
-      expectedReduction: feedIncrease * 0.15,
-      actions: [
-        '질소저감 사료로 교체 (인증 평가 가산점 획득)',
-        '아미노산 균형을 맞춘 사료로 과잉 단백질 급여 방지',
-        '저메탄 첨가제(3-NOP, 해조류) 추가로 15~30% 감축',
-        '사료 급여량 최적화로 불필요한 배출 방지',
-      ],
-      relatedTechnology: '질소저감 사료 급여',
-    });
-  }
-
   // 전력 사용 증가 체크
   const elecIncrease = current.indirectEmissions.electricity - previous.indirectEmissions.electricity;
   if (elecIncrease > 0) {
@@ -123,7 +103,7 @@ function generateImprovementSuggestions(
       actions: [
         '사육 두수 변화 확인 필요',
         'MSY 생산성 향상으로 배출량 감축 (최대 2.8% 감축)',
-        '저메탄 사료 급여로 15~30% 감축 가능',
+        '저메탄 첨가제(3-NOP, 해조류) 급여로 15~30% 감축 가능',
       ],
       relatedTechnology: 'MSY 생산성 향상',
     });
@@ -143,8 +123,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
   const { directEmissions, indirectEmissions, monthlyInputs } = farm.lcaData;
 
   const totalDirect = directEmissions.livestock + directEmissions.manure;
-  const totalIndirect = indirectEmissions.feed + indirectEmissions.electricity +
-                       indirectEmissions.fuel + indirectEmissions.other;
+  const totalIndirect = indirectEmissions.electricity + indirectEmissions.fuel + indirectEmissions.other;
   const totalEmissions = totalDirect + totalIndirect;
 
   // 이전 기간 데이터 선택
@@ -161,8 +140,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
   // 이전 기간 총 배출량 계산
   const prevTotalDirect = previousData.directEmissions.livestock + previousData.directEmissions.manure;
-  const prevTotalIndirect = previousData.indirectEmissions.feed + previousData.indirectEmissions.electricity +
-                            previousData.indirectEmissions.fuel + previousData.indirectEmissions.other;
+  const prevTotalIndirect = previousData.indirectEmissions.electricity + previousData.indirectEmissions.fuel + previousData.indirectEmissions.other;
   const prevTotalEmissions = prevTotalDirect + prevTotalIndirect;
 
   // 비교 계산
@@ -314,7 +292,6 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {suggestions.map((suggestion, idx) => {
               const categoryIcons = {
-                feed: '🌾',
                 electricity: '⚡',
                 fuel: '🔥',
                 manure: '♻️',
@@ -431,20 +408,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       {/* 월간 투입량 */}
       <div className="border-t border-gray-200 pt-6">
         <h4 className="text-sm font-semibold text-gray-700 mb-4">월간 투입량</h4>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
-            <p className="text-xs text-blue-700 mb-1">사료</p>
-            <p className="text-lg font-bold text-blue-900">
-              {monthlyInputs.feedAmount.toLocaleString()}
-              <span className="text-xs ml-1">kg</span>
-            </p>
-            <p className="text-xs text-blue-600 mt-1">
-              <TrendIcon
-                trend={calculateComparison(monthlyInputs.feedAmount, previousData.monthlyInputs.feedAmount).trend}
-                changePercentage={calculateComparison(monthlyInputs.feedAmount, previousData.monthlyInputs.feedAmount).changePercentage}
-              />
-            </p>
-          </div>
+        <div className="grid grid-cols-3 gap-3">
           <div className="p-3 rounded-lg bg-green-50 border border-green-100">
             <p className="text-xs text-green-700 mb-1">전력</p>
             <p className="text-lg font-bold text-green-900">
@@ -487,22 +451,6 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
         </div>
       </div>
 
-      {/* 배출계수 정보 */}
-      <div className="mt-6 p-3 rounded-lg bg-gray-50 border border-gray-200">
-        <div className="flex gap-2">
-          <svg className="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div className="text-xs text-gray-600">
-            <p className="font-medium mb-1">인증 기준 (돼지)</p>
-            <p>• 목표 배출량: 2.13 kg CO₂eq/kg (도체중 기준, 평균 대비 18% 감축)</p>
-            <p>• 가산정 배출량: 70점 만점 (63점 이상 필요)</p>
-            <p>• 비계량 기술: 30점 만점</p>
-            <p>• 인증 기준: 총점 75점 이상</p>
-            <p className="mt-2 text-blue-700 font-medium">※ 사료량이 아닌 "질소저감 사료 급여" 적용이 인증 평가 기준</p>
-          </div>
-        </div>
-      </div>
 
       {/* 개선 제안 상세 모달 */}
       {selectedSuggestion && (
