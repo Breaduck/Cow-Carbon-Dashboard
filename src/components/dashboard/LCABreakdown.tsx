@@ -189,7 +189,6 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
   const categories = [
     { name: '가축 배출', value: directEmissions.livestock, prev: previousData.directEmissions.livestock, color: '#FF6B6B', type: 'direct' },
     { name: '분뇨 배출', value: directEmissions.manure, prev: previousData.directEmissions.manure, color: '#FA8072', type: 'direct' },
-    { name: '사료', value: indirectEmissions.feed, prev: previousData.indirectEmissions.feed, color: '#4ECDC4', type: 'indirect' },
     { name: '전력', value: indirectEmissions.electricity, prev: previousData.indirectEmissions.electricity, color: '#95E1D3', type: 'indirect' },
     { name: '연료', value: indirectEmissions.fuel, prev: previousData.indirectEmissions.fuel, color: '#FFE66D', type: 'indirect' },
     { name: '기타', value: indirectEmissions.other, prev: previousData.indirectEmissions.other, color: '#C7CEEA', type: 'indirect' },

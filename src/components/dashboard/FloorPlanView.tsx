@@ -196,7 +196,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
                   onMouseLeave={() => setHoveredCapsule(null)}
                 >
                   {/* 캡슐 센서 (초록 점) */}
-                  <div className="w-1 h-1 rounded-full bg-green-500 cursor-pointer" />
+                  <div className="w-1 h-1 rounded-full bg-green-500 cursor-pointer animate-pulse ring-2 ring-white shadow-sm" />
 
                   {/* 툴팁 */}
                   {hoveredCapsule === cattleId && (
@@ -224,7 +224,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
               style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
             >
               {/* 내부 센서 마커 (녹색) */}
-              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse ring-4 ring-white shadow-lg" />
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse ring-4 ring-white shadow-lg" />
 
               {/* 툴팁 */}
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
