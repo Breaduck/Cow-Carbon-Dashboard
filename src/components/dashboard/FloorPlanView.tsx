@@ -264,7 +264,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
       <div className="mt-4 flex items-center gap-4 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span className="text-gray-600">고정 센서</span>
+          <span className="text-gray-600">내부 센서</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-blue-500" />

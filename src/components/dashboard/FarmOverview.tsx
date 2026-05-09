@@ -121,7 +121,7 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
 
           {/* 성과 메시지 */}
           <div
-            className={`mb-4 p-3 rounded-lg border-2 transition-all ${
+            className={`mb-4 p-3 rounded-lg border-2 transition-all max-w-2xl ${
               performanceMsg.type === 'warning'
                 ? 'bg-red-50 border-red-500 shadow-lg shadow-red-200'
                 : performanceMsg.type === 'caution'
@@ -132,13 +132,6 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
                 ? 'bg-blue-50 border-blue-500 shadow-lg shadow-blue-200'
                 : 'bg-gray-50 border-gray-500 shadow-lg shadow-gray-200'
             }`}
-            style={{
-              animation: performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
-                ? 'pulse-slow 3s ease-in-out infinite'
-                : performanceMsg.type === 'excellent' || performanceMsg.type === 'good'
-                ? 'pulse-slow 4s ease-in-out infinite'
-                : 'none'
-            }}
           >
             <p className={`text-sm font-semibold ${
               performanceMsg.type === 'warning'
