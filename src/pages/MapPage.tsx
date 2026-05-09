@@ -13,9 +13,30 @@ const mapContainerStyle = {
   height: '100%',
 };
 
-const center = {
+const defaultCenter = {
   lat: 36.5,
   lng: 127.5,
+};
+
+// 지역별 중심 좌표 및 줌 레벨
+const REGION_CENTERS: Record<string, { lat: number; lng: number; zoom: number }> = {
+  '서울특별시': { lat: 37.5665, lng: 126.9780, zoom: 11 },
+  '경기도': { lat: 37.4138, lng: 127.5183, zoom: 9 },
+  '인천광역시': { lat: 37.4563, lng: 126.7052, zoom: 10 },
+  '부산광역시': { lat: 35.1796, lng: 129.0756, zoom: 10 },
+  '대구광역시': { lat: 35.8714, lng: 128.6014, zoom: 10 },
+  '광주광역시': { lat: 35.1595, lng: 126.8526, zoom: 10 },
+  '울산광역시': { lat: 35.5384, lng: 129.3114, zoom: 10 },
+  '대전광역시': { lat: 36.3504, lng: 127.3845, zoom: 10 },
+  '세종특별자치시': { lat: 36.4800, lng: 127.2890, zoom: 11 },
+  '강원특별자치도': { lat: 37.8228, lng: 128.1555, zoom: 9 },
+  '충청북도': { lat: 36.8, lng: 127.7, zoom: 9 },
+  '충청남도': { lat: 36.5184, lng: 126.8000, zoom: 9 },
+  '전북특별자치도': { lat: 35.7175, lng: 127.1530, zoom: 9 },
+  '전라남도': { lat: 34.8679, lng: 126.9910, zoom: 9 },
+  '경상북도': { lat: 36.4919, lng: 128.8889, zoom: 9 },
+  '경상남도': { lat: 35.4606, lng: 128.2132, zoom: 9 },
+  '제주특별자치도': { lat: 33.4890, lng: 126.4983, zoom: 10 },
 };
 
 const mapOptions = {
@@ -35,11 +56,17 @@ const mapOptions = {
 
 export function MapPage() {
   const navigate = useNavigate();
-  const { filteredFarms, selectFarm, filters, setFilter } = useStore();
+  const { farms, filteredFarms, selectFarm, filters, setFilter } = useStore();
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
   const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
   const [inputKey, setInputKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(!apiKey);
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
+  const [mapZoom, setMapZoom] = useState(7);
+
+  // 지도에 표시할 농장 (필터가 없으면 전체, 있으면 필터링된 것)
+  const hasFilters = filters.sido.length > 0 || filters.livestock.length > 0 || filters.grade.length > 0;
+  const displayFarms = hasFilters ? filteredFarms : farms;
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey || 'dummy-key-to-prevent-error',
@@ -83,11 +110,31 @@ export function MapPage() {
     setFilter('livestock', currentLivestock);
   }, [filters.livestock, setFilter]);
 
+  const handleRegionClick = useCallback((region: string) => {
+    // 현재 필터에 해당 지역이 있으면 제거, 없으면 단일 선택
+    const isSelected = filters.sido.includes(region);
+
+    if (isSelected) {
+      // 선택 해제 - 전국 뷰로 복귀
+      setFilter('sido', []);
+      setMapCenter(defaultCenter);
+      setMapZoom(7);
+    } else {
+      // 단일 선택 - 해당 지역만 표시
+      setFilter('sido', [region]);
+      const regionCenter = REGION_CENTERS[region];
+      if (regionCenter) {
+        setMapCenter({ lat: regionCenter.lat, lng: regionCenter.lng });
+        setMapZoom(regionCenter.zoom);
+      }
+    }
+  }, [filters.sido, setFilter]);
+
   // 디버깅: 농장 데이터 확인
   console.log('MapPage Debug:', {
-    totalFarms: filteredFarms.length,
-    firstFarm: filteredFarms[0],
-    sampleCoordinates: filteredFarms.slice(0, 3).map(f => ({
+    totalFarms: displayFarms.length,
+    firstFarm: displayFarms[0],
+    sampleCoordinates: displayFarms.slice(0, 3).map(f => ({
       name: f.name,
       lat: f.location.coordinates.lat,
       lng: f.location.coordinates.lng,
@@ -233,10 +280,50 @@ export function MapPage() {
         </div>
       </div>
 
+      {/* 지역 선택 */}
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center gap-2 mb-2">
+          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span className="text-sm font-semibold text-gray-700">지역별 조회</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {Object.keys(REGION_CENTERS).map(region => {
+            const isSelected = filters.sido.includes(region);
+            const regionShortName = region.replace(/특별시|광역시|특별자치시|특별자치도|도$/g, '');
+            const regionFarms = farms.filter(f => f.location.sido === region);
+
+            return (
+              <button
+                key={region}
+                onClick={() => handleRegionClick(region)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  isSelected
+                    ? 'bg-primary-600 text-white shadow-md scale-105'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:border-primary-400 hover:bg-primary-50'
+                }`}
+              >
+                {regionShortName} ({regionFarms.length})
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* 필터 상태 표시 */}
-      {(filters.livestock.length > 0 || filters.grade.length > 0) && (
+      {(filters.livestock.length > 0 || filters.grade.length > 0 || filters.sido.length > 0) && (
         <div className="px-4 py-2 bg-primary-50 border-b border-primary-100 flex items-center gap-2 text-sm">
           <span className="text-primary-700">필터 적용됨:</span>
+          {filters.sido.map(sido => (
+            <span
+              key={sido}
+              className="px-2 py-1 bg-white rounded-full text-xs border border-primary-500 text-primary-700 font-semibold"
+            >
+              {sido.replace(/특별시|광역시|특별자치시|특별자치도|도$/g, '')}
+            </span>
+          ))}
           {filters.livestock.map(type => (
             <span
               key={type}
@@ -255,7 +342,7 @@ export function MapPage() {
             </span>
           ))}
           <span className="text-primary-600 ml-auto">
-            {filteredFarms.length}개 농장 표시 중
+            {displayFarms.length}개 농장 표시 중
           </span>
         </div>
       )}
@@ -264,12 +351,12 @@ export function MapPage() {
       <div className="flex-1 relative">
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
-          center={center}
-          zoom={7}
+          center={mapCenter}
+          zoom={mapZoom}
           options={mapOptions}
           onLoad={() => console.log('Google Map loaded!')}
         >
-          {filteredFarms.map(farm => {
+          {displayFarms.map(farm => {
             const livestockInfo = LIVESTOCK_INFO[farm.livestock.type];
 
             return (
