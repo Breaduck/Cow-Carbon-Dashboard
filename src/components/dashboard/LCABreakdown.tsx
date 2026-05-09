@@ -187,8 +187,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
   const targetEmissionPerKg = 2.13; // kg CO2eq/kg 도체중
   const targetEmissionTotal = targetEmissionPerKg * farm.carcassWeight;
   const currentEmissionPerKg = totalEmissions / farm.carcassWeight;
-  // 목표 대비 현재 배출량 비율 (낮을수록 좋음, 100% 초과 시 목표 미달성)
-  const targetAchievementRate = (currentEmissionPerKg / targetEmissionPerKg) * 100;
+  const targetAchievementRate = (targetEmissionTotal / totalEmissions) * 100;
 
   // 인증 점수 계산 (간단 버전)
   const reductionRate = ((2.60 - currentEmissionPerKg) / 2.60) * 100;
@@ -300,29 +299,23 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
         {/* 목표 달성도 */}
         {farm.livestock.type === 'pig' && (
-          <div className="pt-3 border-t border-gray-200">
+          <div className="pt-3 border-t border-primary-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-700">목표 대비 배출량</span>
-              <span className={`text-sm font-bold ${targetAchievementRate <= 100 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className="text-xs text-primary-700">인증 목표 달성도</span>
+              <span className="text-sm font-bold text-primary-900">
                 {targetAchievementRate.toFixed(1)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 relative">
+            <div className="w-full bg-primary-200 rounded-full h-2">
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  targetAchievementRate <= 100
-                    ? 'bg-gradient-to-r from-green-500 to-green-600'
-                    : 'bg-gradient-to-r from-red-500 to-red-600'
-                }`}
+                className="h-2 rounded-full transition-all duration-500 bg-gradient-to-r from-primary-500 to-primary-600"
                 style={{ width: `${Math.min(100, targetAchievementRate)}%` }}
               />
-              {/* 100% 기준선 */}
-              <div className="absolute top-0 bottom-0 w-0.5 bg-gray-400" style={{ left: '100%' }} />
             </div>
-            <div className="flex justify-between mt-1 text-xs text-gray-600">
-              <span>현재: {currentEmissionPerKg.toFixed(2)} / 목표: {targetEmissionPerKg} kg CO₂eq/kg</span>
+            <div className="flex justify-between mt-1 text-xs text-primary-600">
+              <span>목표: {currentEmissionPerKg.toFixed(2)} / {targetEmissionPerKg} kg CO₂eq/kg</span>
               <span className={emissionScore >= 63 ? 'text-green-600 font-semibold' : 'text-orange-600'}>
-                점수: {emissionScore.toFixed(1)}/70
+                배출량 점수: {emissionScore.toFixed(1)}/70점
               </span>
             </div>
           </div>
