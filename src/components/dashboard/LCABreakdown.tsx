@@ -35,18 +35,24 @@ function generateImprovementSuggestions(
 
   // 전력 사용 증가 체크
   const elecIncrease = current.indirectEmissions.electricity - previous.indirectEmissions.electricity;
+  const elecUsageIncrease = current.monthlyInputs.electricityUsage - previous.monthlyInputs.electricityUsage;
+  const elecUsagePercent = previous.monthlyInputs.electricityUsage === 0 ? 0 : (elecUsageIncrease / previous.monthlyInputs.electricityUsage) * 100;
+
   if (elecIncrease > 0) {
     const increasePercent = ((elecIncrease / previous.indirectEmissions.electricity) * 100).toFixed(1);
+    const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
+
     suggestions.push({
       category: 'electricity',
       severity: elecIncrease > previous.indirectEmissions.electricity * 0.1 ? 'high' : 'medium',
-      title: `전력 배출량 ${increasePercent}% 증가`,
-      description: `${periodLabel} 대비 전력 관련 배출량이 ${elecIncrease.toLocaleString()}kg CO₂eq 증가했습니다.`,
+      title: `${periodLabel} 대비 전력 소모량 ${Math.abs(elecUsagePercent).toFixed(0)}% 증가 - ${actionDeadline} 조치 필요`,
+      description: `전력 배출량 ${increasePercent}% 증가 (${elecIncrease.toLocaleString()}kg CO₂eq ↑)\n전력 사용량: ${elecUsageIncrease.toLocaleString()}kWh 증가`,
       expectedReduction: elecIncrease * 0.3,
       actions: [
-        '신재생에너지(태양광) 설치로 30% 감축 가능',
-        '환기 시스템 가동 시간 최적화',
-        'LED 조명 및 고효율 설비로 교체',
+        `${actionDeadline} 사용하지 않는 조명·환기팬 전원 차단`,
+        `${actionDeadline} 환기 시스템 가동 시간 점검 및 조정`,
+        '이번 달 내 LED 조명 교체 계획 수립 (30% 절감)',
+        '태양광 설치 견적 문의 (월 전력비 50% 절감)',
       ],
       relatedTechnology: '신재생에너지 사용',
     });
@@ -54,18 +60,27 @@ function generateImprovementSuggestions(
 
   // 연료 사용 증가 체크
   const fuelIncrease = current.indirectEmissions.fuel - previous.indirectEmissions.fuel;
+  const dieselIncrease = current.monthlyInputs.dieselUsage - previous.monthlyInputs.dieselUsage;
+  const lpgIncrease = current.monthlyInputs.lpgUsage - previous.monthlyInputs.lpgUsage;
+  const totalFuelIncrease = dieselIncrease + lpgIncrease;
+  const fuelUsagePercent = (previous.monthlyInputs.dieselUsage + previous.monthlyInputs.lpgUsage) === 0 ? 0 :
+    (totalFuelIncrease / (previous.monthlyInputs.dieselUsage + previous.monthlyInputs.lpgUsage)) * 100;
+
   if (fuelIncrease > 0) {
     const increasePercent = ((fuelIncrease / previous.indirectEmissions.fuel) * 100).toFixed(1);
+    const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
+
     suggestions.push({
       category: 'fuel',
       severity: fuelIncrease > previous.indirectEmissions.fuel * 0.1 ? 'high' : 'low',
-      title: `연료 배출량 ${increasePercent}% 증가`,
-      description: `${periodLabel} 대비 연료 관련 배출량이 ${fuelIncrease.toLocaleString()}kg CO₂eq 증가했습니다.`,
+      title: `${periodLabel} 대비 연료 소모량 ${Math.abs(fuelUsagePercent).toFixed(0)}% 증가 - ${actionDeadline} 점검 필요`,
+      description: `연료 배출량 ${increasePercent}% 증가 (${fuelIncrease.toLocaleString()}kg CO₂eq ↑)\n경유/LPG 사용량: ${totalFuelIncrease.toFixed(0)}L/kg 증가`,
       expectedReduction: fuelIncrease * 0.2,
       actions: [
-        '난방 효율 개선 및 단열 강화',
-        '연료 사용 장비 점검 및 최적화',
-        '불필요한 공회전 방지',
+        `${actionDeadline} 난방기 설정온도 1-2도 낮추기`,
+        `${actionDeadline} 장비 공회전 중단 (연료 10-15% 절감)`,
+        '이번 주 내 축사 단열 상태 점검 및 보수',
+        '이번 달 내 난방 장비 정기점검 실시',
       ],
     });
   }
@@ -74,17 +89,20 @@ function generateImprovementSuggestions(
   const manureIncrease = current.directEmissions.manure - previous.directEmissions.manure;
   if (manureIncrease > 0) {
     const increasePercent = ((manureIncrease / previous.directEmissions.manure) * 100).toFixed(1);
+    const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
+    const processingStatus = manureIncrease > previous.directEmissions.manure * 0.15 ? '피트 내 슬러리 미처리 확인' : '분뇨 처리 주기 점검 필요';
+
     suggestions.push({
       category: 'manure',
       severity: manureIncrease > previous.directEmissions.manure * 0.1 ? 'high' : 'medium',
-      title: `분뇨 배출량 ${increasePercent}% 증가`,
-      description: `${periodLabel} 대비 분뇨 관련 배출량이 ${manureIncrease.toLocaleString()}kg CO₂eq 증가했습니다.`,
+      title: `${processingStatus} - ${actionDeadline} 슬러리 처리 실시`,
+      description: `분뇨 배출량 ${increasePercent}% 증가 (${manureIncrease.toLocaleString()}kg CO₂eq ↑)\n원인: 슬러리 처리 지연 또는 미흡`,
       expectedReduction: manureIncrease * 0.25,
       actions: [
-        '피트 내 슬러리를 월 1회 이상 처리 (6점 획득)',
-        '액비순환시스템 도입 검토 (6점 획득)',
-        '호기성 처리(퇴비화) 시설 개선',
-        '바이오가스 포집 시설 설치 (5점 획득, 30% 감축)',
+        `${actionDeadline} 피트 내 슬러리 즉시 처리 (월 1회 이상 필수)`,
+        `${actionDeadline} 분뇨 처리 일지 작성 및 기록 (인증 6점)`,
+        '이번 주 내 액비순환시스템 도입 검토 (인증 6점)',
+        '이번 달 내 바이오가스 포집 시설 설치 상담 (30% 감축, 인증 5점)',
       ],
       relatedTechnology: '분뇨의 바이오 에너지화',
     });
@@ -94,16 +112,20 @@ function generateImprovementSuggestions(
   const livestockIncrease = current.directEmissions.livestock - previous.directEmissions.livestock;
   if (livestockIncrease > 0) {
     const increasePercent = ((livestockIncrease / previous.directEmissions.livestock) * 100).toFixed(1);
+    const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
+    const headCountStatus = livestockIncrease > previous.directEmissions.livestock * 0.05 ? '사육 두수 증가 또는 장내발효 증가' : '장내발효 미세 증가';
+
     suggestions.push({
       category: 'livestock',
       severity: livestockIncrease > previous.directEmissions.livestock * 0.05 ? 'medium' : 'low',
-      title: `가축 배출량 ${increasePercent}% 증가`,
-      description: `${periodLabel} 대비 가축 직접 배출량이 ${livestockIncrease.toLocaleString()}kg CO₂eq 증가했습니다.`,
+      title: `${headCountStatus} - ${actionDeadline} 저메탄 첨가제 급여 검토`,
+      description: `가축 배출량 ${increasePercent}% 증가 (${livestockIncrease.toLocaleString()}kg CO₂eq ↑)\n원인: 장내발효 메탄 배출 증가`,
       expectedReduction: livestockIncrease * 0.15,
       actions: [
-        '사육 두수 변화 확인 필요',
-        'MSY 생산성 향상으로 배출량 감축 (최대 2.8% 감축)',
-        '저메탄 첨가제(3-NOP, 해조류) 급여로 15~30% 감축 가능',
+        `${actionDeadline} 사육 두수 및 건강 상태 점검`,
+        '이번 주 내 저메탄 첨가제(3-NOP, 해조류) 급여 시작 (15-30% 감축)',
+        '이번 달 내 MSY 생산성 개선 계획 수립 (최대 2.8% 감축)',
+        '수의사 상담으로 가축 건강 및 사료 효율 개선',
       ],
       relatedTechnology: 'MSY 생산성 향상',
     });
@@ -117,13 +139,16 @@ function generateImprovementSuggestions(
 }
 
 export function LCABreakdown({ farm }: LCABreakdownProps) {
-  const [period, setPeriod] = useState<ComparisonPeriod>('weekly');
+  const [period, setPeriod] = useState<ComparisonPeriod>('daily');
   const [selectedSuggestion, setSelectedSuggestion] = useState<ImprovementSuggestion | null>(null);
 
+  // 기간별 배출량 계산 (월간 기준을 일/주/월로 나눔)
   const { directEmissions, indirectEmissions, monthlyInputs } = farm.lcaData;
 
-  const totalDirect = directEmissions.livestock + directEmissions.manure;
-  const totalIndirect = indirectEmissions.electricity + indirectEmissions.fuel + indirectEmissions.other;
+  const periodMultiplier = period === 'daily' ? 1/30 : period === 'weekly' ? 7/30 : 1;
+
+  const totalDirect = (directEmissions.livestock + directEmissions.manure) * periodMultiplier;
+  const totalIndirect = (indirectEmissions.electricity + indirectEmissions.fuel + indirectEmissions.other) * periodMultiplier;
   const totalEmissions = totalDirect + totalIndirect;
 
   // 이전 기간 데이터 선택
@@ -180,6 +205,12 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
     monthly: '전월',
   };
 
+  const periodTitles = {
+    daily: '일간',
+    weekly: '주간',
+    monthly: '월간',
+  };
+
   // 트렌드 아이콘
   const TrendIcon = ({ trend, changePercentage }: { trend: TrendDirection; changePercentage: number }) => {
     if (trend === 'stable') {
@@ -198,8 +229,8 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">전과정평가 (LCA) 탄소발자국</h3>
-            <p className="text-sm text-gray-500">Life Cycle Assessment - 월간 배출량 비교</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">탄소배출량 현황</h3>
+            <p className="text-base text-gray-600">{periodTitles[period]} 배출량 추이</p>
           </div>
 
           {/* 비교 주기 선택 */}
@@ -208,7 +239,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
                   period === p
                     ? 'bg-white text-primary-700 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -222,33 +253,33 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       </div>
 
       {/* 총 배출량 비교 카드 */}
-      <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200">
+      <div className="mb-6 p-5 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-sm text-primary-700 mb-1">총 탄소배출량 (월간)</p>
-            <p className="text-3xl font-bold text-primary-900">
-              {totalEmissions.toLocaleString()}
-              <span className="text-lg ml-2">kg CO₂eq</span>
+            <p className="text-base font-medium text-primary-700 mb-2">총 탄소배출량 ({periodTitles[period]})</p>
+            <p className="text-4xl font-bold text-primary-900">
+              {totalEmissions.toFixed(0).toLocaleString()}
+              <span className="text-xl ml-2">kg CO₂eq</span>
             </p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-xs text-primary-600">{periodLabels[period]} 대비</span>
-              <span className="text-sm font-semibold">
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-sm text-primary-600">{periodLabels[period]} 대비</span>
+              <span className="text-base font-semibold">
                 <TrendIcon trend={totalComparison.trend} changePercentage={totalComparison.changePercentage} />
               </span>
             </div>
           </div>
           <div className="text-right">
-            <div className="mb-3">
-              <p className="text-xs text-primary-600">직접 배출</p>
-              <p className="text-lg font-bold text-primary-800">{totalDirect.toLocaleString()}</p>
-              <span className="text-xs">
+            <div className="mb-4">
+              <p className="text-sm text-primary-600 mb-1">직접 배출</p>
+              <p className="text-2xl font-bold text-primary-800">{totalDirect.toFixed(0).toLocaleString()}</p>
+              <span className="text-sm">
                 <TrendIcon trend={directComparison.trend} changePercentage={directComparison.changePercentage} />
               </span>
             </div>
             <div>
-              <p className="text-xs text-primary-600">간접 배출</p>
-              <p className="text-lg font-bold text-primary-800">{totalIndirect.toLocaleString()}</p>
-              <span className="text-xs">
+              <p className="text-sm text-primary-600 mb-1">간접 배출</p>
+              <p className="text-2xl font-bold text-primary-800">{totalIndirect.toFixed(0).toLocaleString()}</p>
+              <span className="text-sm">
                 <TrendIcon trend={indirectComparison.trend} changePercentage={indirectComparison.changePercentage} />
               </span>
             </div>
@@ -283,7 +314,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       {/* 개선 제안 (배출 증가 시에만 표시) */}
       {suggestions.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
@@ -329,7 +360,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                   </div>
 
                   {/* 제목 */}
-                  <h5 className="text-sm font-bold text-gray-900 mb-2 pr-12 line-clamp-2 group-hover:text-primary-700 transition-colors">
+                  <h5 className="text-base font-bold text-gray-900 mb-2 pr-12 line-clamp-3 group-hover:text-primary-700 transition-colors leading-snug">
                     {suggestion.title}
                   </h5>
 
@@ -360,7 +391,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
       {/* 배출 구성 비율 */}
       <div className="mb-6">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">배출원별 구성</h4>
+        <h4 className="text-base font-semibold text-gray-700 mb-4">배출원별 구성</h4>
         <div className="space-y-3">
           {categories.map(category => {
             const percentage = (category.value / totalEmissions * 100).toFixed(1);
@@ -407,7 +438,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
       {/* 월간 투입량 */}
       <div className="border-t border-gray-200 pt-6">
-        <h4 className="text-sm font-semibold text-gray-700 mb-4">월간 투입량</h4>
+        <h4 className="text-base font-semibold text-gray-700 mb-4">월간 투입량</h4>
         <div className="grid grid-cols-3 gap-3">
           <div className="p-3 rounded-lg bg-green-50 border border-green-100">
             <p className="text-xs text-green-700 mb-1">전력</p>
@@ -463,12 +494,12 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
           <div className="space-y-4">
             {/* 제목 */}
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
                 {selectedSuggestion.title}
               </h3>
-              <p className="text-sm text-gray-600">
+              <div className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
                 {selectedSuggestion.description}
-              </p>
+              </div>
             </div>
 
             {/* 예상 감축량 */}
