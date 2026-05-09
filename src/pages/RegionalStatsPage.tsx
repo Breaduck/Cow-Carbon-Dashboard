@@ -6,7 +6,6 @@ import { LivestockPieChart } from '../components/charts/LivestockPieChart';
 
 // 지역 순서
 const REGION_ORDER = [
-  '대구광역시',
   '울산광역시',
   '세종특별자치시',
   '강원특별자치도',

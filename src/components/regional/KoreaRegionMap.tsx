@@ -16,7 +16,6 @@ const REGION_SVG_COORDS: Record<string, { x: number; y: number }> = {
   '전북특별자치도': { x: 180, y: 390 },   // 서남부
   '전라남도': { x: 160, y: 480 },         // 최서남부
   '경상북도': { x: 340, y: 310 },         // 동부 중앙
-  '대구광역시': { x: 320, y: 360 },       // 경북 남부
   '경상남도': { x: 310, y: 430 },         // 남동부
   '울산광역시': { x: 380, y: 410 },       // 동해안 남부
   '제주특별자치도': { x: 200, y: 580 },   // 최남단
@@ -25,7 +24,6 @@ const REGION_SVG_COORDS: Record<string, { x: number; y: number }> = {
 // 지역명 축약 (표준 약칭)
 const getShortRegionName = (region: string) => {
   const shortNames: Record<string, string> = {
-    '대구광역시': '대구',
     '울산광역시': '울산',
     '세종특별자치시': '세종',
     '강원특별자치도': '강원',
