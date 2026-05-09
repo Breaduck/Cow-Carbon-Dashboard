@@ -6,6 +6,7 @@ import { LCABreakdown } from '../components/dashboard/LCABreakdown';
 import { FloorPlanView } from '../components/dashboard/FloorPlanView';
 import { GasGauges } from '../components/dashboard/GasGauges';
 import { EmissionChart } from '../components/charts/EmissionChart';
+import { PerformanceCalendar } from '../components/alerts/PerformanceCalendar';
 
 export function DashboardPage() {
   const { farmId } = useParams<{ farmId: string }>();
@@ -48,6 +49,8 @@ export function DashboardPage() {
         <EmissionChart farm={selectedFarm} />
 
         <LCABreakdown farm={selectedFarm} />
+
+        <PerformanceCalendar farm={selectedFarm} />
       </div>
     </div>
   );

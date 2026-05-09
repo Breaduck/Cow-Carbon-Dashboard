@@ -121,16 +121,16 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
 
           {/* 성과 메시지 */}
           <div
-            className={`mb-4 p-3 rounded-lg border-2 transition-all max-w-2xl ${
+            className={`mb-4 p-3 rounded-lg border-2 transition-all inline-block ${
               performanceMsg.type === 'warning'
-                ? 'bg-red-50 border-red-500 shadow-lg shadow-red-200'
+                ? 'bg-red-50 border-red-500'
                 : performanceMsg.type === 'caution'
-                ? 'bg-orange-50 border-orange-500 shadow-lg shadow-orange-200'
+                ? 'bg-orange-50 border-orange-500'
                 : performanceMsg.type === 'excellent'
-                ? 'bg-green-50 border-green-500 shadow-lg shadow-green-200'
+                ? 'bg-green-50 border-green-500'
                 : performanceMsg.type === 'good'
-                ? 'bg-blue-50 border-blue-500 shadow-lg shadow-blue-200'
-                : 'bg-gray-50 border-gray-500 shadow-lg shadow-gray-200'
+                ? 'bg-blue-50 border-blue-500'
+                : 'bg-gray-50 border-gray-500'
             }`}
           >
             <p className={`text-sm font-semibold ${
@@ -168,9 +168,9 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
                 })}
               </p>
             </div>
-            <div className="p-4 rounded-xl" style={{ backgroundColor: farm.certification.grade === 'A' ? '#dcfce7' : farm.certification.grade === 'B' ? '#dbeafe' : '#fef3c7' }}>
-              <p className="text-xs mb-1" style={{ color: farm.certification.grade === 'A' ? '#166534' : farm.certification.grade === 'B' ? '#1e40af' : '#854d0e' }}>인증등급</p>
-              <p className="text-sm font-bold" style={{ color: farm.certification.grade === 'A' ? '#166534' : farm.certification.grade === 'B' ? '#1e40af' : '#854d0e' }}>
+            <div className="p-4 rounded-xl bg-gray-50">
+              <p className="text-xs text-gray-500 mb-1">인증등급</p>
+              <p className="text-sm font-semibold text-gray-900">
                 {farm.certification.grade}등급
               </p>
             </div>

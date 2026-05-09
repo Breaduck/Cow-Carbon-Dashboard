@@ -106,8 +106,8 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
 
   return (
     <Card title={`센서 배치도 - ${layout.title}`} padding="lg">
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl overflow-hidden border border-gray-200">
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 300">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center">
+        <svg className="w-full h-full" viewBox="0 0 400 300">
           {/* 외곽 표시 (농장 경계) */}
           <rect x="10" y="10" width="380" height="280" fill="none" stroke="#94a3b8" strokeWidth="2" strokeDasharray="8,4" rx="4"/>
 
