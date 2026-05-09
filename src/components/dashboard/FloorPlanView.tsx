@@ -43,10 +43,9 @@ const FARM_LAYOUTS: Record<LivestockType, {
       { id: 'milking', x: 110, y: 45, width: 80, height: 50, label: '착유실', color: '#fce7f3', isSensorZone: true },
       { id: 'barn', x: 210, y: 30, width: 150, height: 80, label: '착유우사', color: '#fef3c7', isSensorZone: true },
       // 하단 시설
-      { id: 'calf', x: 40, y: 130, width: 80, height: 60, label: '송아지사', color: '#fef9c4', isSensorZone: true },
-      { id: 'feed', x: 140, y: 130, width: 70, height: 60, label: '사료창고', color: '#dbeafe', isSensorZone: false },
-      { id: 'manure', x: 230, y: 130, width: 90, height: 60, label: '분뇨처리장', color: '#dcfce7', isSensorZone: true },
-      { id: 'office', x: 340, y: 130, width: 50, height: 60, label: '관리실', color: '#e5e7eb', isSensorZone: false },
+      { id: 'feed', x: 40, y: 130, width: 90, height: 60, label: '사료창고', color: '#dbeafe', isSensorZone: false },
+      { id: 'manure', x: 160, y: 130, width: 120, height: 60, label: '분뇨처리장', color: '#dcfce7', isSensorZone: true },
+      { id: 'office', x: 300, y: 130, width: 75, height: 60, label: '관리실', color: '#e5e7eb', isSensorZone: false },
     ],
   },
   pig: {

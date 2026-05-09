@@ -156,23 +156,23 @@ export function generateFarms(): Farm[] {
     const headCount = random.nextInt(minHead, maxHead);
 
     // 센서 개수 (규모별 최적화)
-    // 한우/젖소: 우사당 2-4개 + 분뇨처리장 2개 + 외부 기준선 4개
-    // 돼지: 돈사당 2개 + 분뇨처리장 2개 + 외부 기준선 4개
+    // 소 우사: 모서리 4개 + 중앙 1개 = 5개가 기본
+    // 외부 기준선: 동서남북 4개 고정
     const sensorCounts: Record<LivestockType, Record<FarmSize, number>> = {
       beef_cattle: {
-        small: 10,   // 우사1(2) + 우사2(2) + 분뇨(2) + 외부(4)
-        medium: 14,  // 우사1(3) + 우사2(3) + 분뇨(4) + 외부(4)
-        large: 18,   // 우사1(4) + 우사2(4) + 분뇨(6) + 외부(4)
+        small: 16,   // 우사1(5) + 우사2(5) + 분뇨(2) + 외부(4)
+        medium: 16,  // 우사1(5) + 우사2(5) + 분뇨(2) + 외부(4)
+        large: 16,   // 우사1(5) + 우사2(5) + 분뇨(2) + 외부(4)
       },
       dairy_cattle: {
-        small: 11,   // 착유실(2) + 우사(2) + 송아지사(1) + 분뇨(2) + 외부(4)
-        medium: 15,  // 착유실(3) + 우사(3) + 송아지사(2) + 분뇨(3) + 외부(4)
-        large: 19,   // 착유실(4) + 우사(4) + 송아지사(3) + 분뇨(4) + 외부(4)
+        small: 13,   // 착유실(2) + 착유우사(5) + 분뇨(2) + 외부(4)
+        medium: 13,  // 착유실(2) + 착유우사(5) + 분뇨(2) + 외부(4)
+        large: 13,   // 착유실(2) + 착유우사(5) + 분뇨(2) + 외부(4)
       },
       pig: {
-        small: 14,   // 분만(2) + 자돈(2) + 육성(2) + 비육1(1) + 비육2(1) + 분뇨(2) + 외부(4)
-        medium: 16,  // 분만(2) + 자돈(2) + 육성(2) + 비육1(2) + 비육2(2) + 분뇨(2) + 외부(4)
-        large: 21,   // 분만(3) + 자돈(3) + 육성(3) + 비육1(3) + 비육2(3) + 분뇨(2) + 외부(4)
+        small: 21,   // 분만(2) + 자돈(2) + 육성(2) + 비육1(3) + 비육2(3) + 분뇨(3) + 외부(4)
+        medium: 21,  // 분만(2) + 자돈(2) + 육성(2) + 비육1(3) + 비육2(3) + 분뇨(3) + 외부(4)
+        large: 21,   // 분만(2) + 자돈(2) + 육성(2) + 비육1(3) + 비육2(3) + 분뇨(3) + 외부(4)
       },
     };
     const sensorCount = sensorCounts[livestock][size];
@@ -483,8 +483,7 @@ function calculateEmissionMeasurementPositions(
     dairy_cattle: {
       milking: { x: 110, width: 80, y: 45, height: 50, label: '착유실' },
       barn: { x: 210, width: 150, y: 30, height: 80, label: '착유우사' },
-      calf: { x: 40, width: 80, y: 130, height: 60, label: '송아지사' },
-      manure: { x: 230, width: 90, y: 130, height: 60, label: '분뇨처리장' },
+      manure: { x: 160, width: 120, y: 130, height: 60, label: '분뇨처리장' },
     },
     pig: {
       farrowing: { x: 30, width: 100, y: 30, height: 55, label: '분만사' },
@@ -503,101 +502,85 @@ function calculateEmissionMeasurementPositions(
   ) => {
     const centerX = building.x + building.width / 2;
     const centerY = building.y + building.height / 2;
+    // SVG viewBox 기준 좌표를 % 좌표로 변환 (viewBox: 400x300)
+    const toPercentX = (x: number) => (x / 400) * 100;
+    const toPercentY = (y: number) => (y / 300) * 100;
 
     if (count === 1) {
-      positions.push({ x: centerX, y: centerY, zone: building.label, isOutdoor: false });
+      positions.push({ x: toPercentX(centerX), y: toPercentY(centerY), zone: building.label, isOutdoor: false });
     } else if (count === 2) {
-      // 좌우 배치 (메탄 측정 최적화)
+      // 좌우 배치
       positions.push(
-        { x: building.x + building.width * 0.33, y: centerY, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.67, y: centerY, zone: building.label, isOutdoor: false }
+        { x: toPercentX(building.x + building.width * 0.33), y: toPercentY(centerY), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.67), y: toPercentY(centerY), zone: building.label, isOutdoor: false }
       );
     } else if (count === 3) {
       // 좌중우 배치
       positions.push(
-        { x: building.x + building.width * 0.25, y: centerY, zone: building.label, isOutdoor: false },
-        { x: centerX, y: centerY, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.75, y: centerY, zone: building.label, isOutdoor: false }
+        { x: toPercentX(building.x + building.width * 0.25), y: toPercentY(centerY), zone: building.label, isOutdoor: false },
+        { x: toPercentX(centerX), y: toPercentY(centerY), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.75), y: toPercentY(centerY), zone: building.label, isOutdoor: false }
+      );
+    } else if (count === 5) {
+      // 모서리 4개 + 중앙 1개 (우사 최적 배치)
+      positions.push(
+        // 4 모서리
+        { x: toPercentX(building.x + building.width * 0.15), y: toPercentY(building.y + building.height * 0.2), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.85), y: toPercentY(building.y + building.height * 0.2), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.15), y: toPercentY(building.y + building.height * 0.8), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.85), y: toPercentY(building.y + building.height * 0.8), zone: building.label, isOutdoor: false },
+        // 중앙
+        { x: toPercentX(centerX), y: toPercentY(centerY), zone: building.label, isOutdoor: false }
       );
     } else if (count === 4) {
-      // 사각 배치 (전후좌우)
+      // 사각 배치 (4 모서리)
       positions.push(
-        { x: building.x + building.width * 0.33, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.67, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.33, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.67, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false }
+        { x: toPercentX(building.x + building.width * 0.2), y: toPercentY(building.y + building.height * 0.25), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.8), y: toPercentY(building.y + building.height * 0.25), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.2), y: toPercentY(building.y + building.height * 0.75), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.8), y: toPercentY(building.y + building.height * 0.75), zone: building.label, isOutdoor: false }
       );
     } else if (count === 6) {
       // 2×3 배치
       positions.push(
-        { x: building.x + building.width * 0.25, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.5, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.75, y: building.y + building.height * 0.33, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.25, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.5, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false },
-        { x: building.x + building.width * 0.75, y: building.y + building.height * 0.67, zone: building.label, isOutdoor: false }
+        { x: toPercentX(building.x + building.width * 0.25), y: toPercentY(building.y + building.height * 0.33), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.5), y: toPercentY(building.y + building.height * 0.33), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.75), y: toPercentY(building.y + building.height * 0.33), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.25), y: toPercentY(building.y + building.height * 0.67), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.5), y: toPercentY(building.y + building.height * 0.67), zone: building.label, isOutdoor: false },
+        { x: toPercentX(building.x + building.width * 0.75), y: toPercentY(building.y + building.height * 0.67), zone: building.label, isOutdoor: false }
       );
     }
   };
 
   // 축종별 센서 배치
+  // 소 우사: 모서리 4개 + 중앙 1개 = 5개 (모든 규모 동일)
   if (livestock === 'beef_cattle') {
     const coords = buildingCoords.beef_cattle;
-    if (size === 'small') {
-      addSensorsToBuilding(coords.barn1, 2);
-      addSensorsToBuilding(coords.barn2, 2);
-      addSensorsToBuilding(coords.manure, 2);
-    } else if (size === 'medium') {
-      addSensorsToBuilding(coords.barn1, 3);
-      addSensorsToBuilding(coords.barn2, 3);
-      addSensorsToBuilding(coords.manure, 4);
-    } else {
-      addSensorsToBuilding(coords.barn1, 4);
-      addSensorsToBuilding(coords.barn2, 4);
-      addSensorsToBuilding(coords.manure, 6);
-    }
+    // 우사 1동, 2동: 각각 모서리 4개 + 중앙 1개 = 5개
+    addSensorsToBuilding(coords.barn1, 5);
+    addSensorsToBuilding(coords.barn2, 5);
+    // 분뇨처리장: 2개
+    addSensorsToBuilding(coords.manure, 2);
   } else if (livestock === 'dairy_cattle') {
     const coords = buildingCoords.dairy_cattle;
-    if (size === 'small') {
-      addSensorsToBuilding(coords.milking, 2);
-      addSensorsToBuilding(coords.barn, 2);
-      addSensorsToBuilding(coords.calf, 1);
-      addSensorsToBuilding(coords.manure, 2);
-    } else if (size === 'medium') {
-      addSensorsToBuilding(coords.milking, 3);
-      addSensorsToBuilding(coords.barn, 3);
-      addSensorsToBuilding(coords.calf, 2);
-      addSensorsToBuilding(coords.manure, 3);
-    } else {
-      addSensorsToBuilding(coords.milking, 4);
-      addSensorsToBuilding(coords.barn, 4);
-      addSensorsToBuilding(coords.calf, 3);
-      addSensorsToBuilding(coords.manure, 4);
-    }
+    // 착유실: 2개
+    addSensorsToBuilding(coords.milking, 2);
+    // 착유우사: 모서리 4개 + 중앙 1개 = 5개
+    addSensorsToBuilding(coords.barn, 5);
+    // 분뇨처리장: 2개
+    addSensorsToBuilding(coords.manure, 2);
   } else if (livestock === 'pig') {
     const coords = buildingCoords.pig;
-    if (size === 'small') {
-      addSensorsToBuilding(coords.farrowing, 2);
-      addSensorsToBuilding(coords.nursery, 2);
-      addSensorsToBuilding(coords.grower, 2);
-      addSensorsToBuilding(coords.finisher1, 1);
-      addSensorsToBuilding(coords.finisher2, 1);
-      addSensorsToBuilding(coords.manure, 2);
-    } else if (size === 'medium') {
-      addSensorsToBuilding(coords.farrowing, 2);
-      addSensorsToBuilding(coords.nursery, 2);
-      addSensorsToBuilding(coords.grower, 2);
-      addSensorsToBuilding(coords.finisher1, 2);
-      addSensorsToBuilding(coords.finisher2, 2);
-      addSensorsToBuilding(coords.manure, 2);
-    } else {
-      addSensorsToBuilding(coords.farrowing, 3);
-      addSensorsToBuilding(coords.nursery, 3);
-      addSensorsToBuilding(coords.grower, 3);
-      addSensorsToBuilding(coords.finisher1, 3);
-      addSensorsToBuilding(coords.finisher2, 3);
-      addSensorsToBuilding(coords.manure, 2);
-    }
+    // 분만사, 자돈사, 육성사: 각 2개
+    addSensorsToBuilding(coords.farrowing, 2);
+    addSensorsToBuilding(coords.nursery, 2);
+    addSensorsToBuilding(coords.grower, 2);
+    // 비육사 1동, 2동: 각 3개 (모서리 2개 + 중앙 1개)
+    addSensorsToBuilding(coords.finisher1, 3);
+    addSensorsToBuilding(coords.finisher2, 3);
+    // 분뇨처리장: 3개
+    addSensorsToBuilding(coords.manure, 3);
   }
 
   // 외부 기준선 센서 배치 (모든 축종/규모 동일 - 동서남북 4개 고정)
