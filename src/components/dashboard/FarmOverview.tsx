@@ -121,32 +121,39 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
 
           {/* 성과 메시지 */}
           <div
-            className={`mb-4 px-4 py-3 rounded-lg border-2 font-medium text-sm transition-all ${
-              performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
-                ? performanceMsg.color
+            className={`mb-4 p-3 rounded-lg border-2 transition-all ${
+              performanceMsg.type === 'warning'
+                ? 'bg-red-50 border-red-500 shadow-lg shadow-red-200'
+                : performanceMsg.type === 'caution'
+                ? 'bg-orange-50 border-orange-500 shadow-lg shadow-orange-200'
                 : performanceMsg.type === 'excellent'
-                ? 'bg-green-50 border-green-500 text-green-800'
+                ? 'bg-green-50 border-green-500 shadow-lg shadow-green-200'
                 : performanceMsg.type === 'good'
-                ? 'bg-blue-50 border-blue-500 text-blue-800'
-                : performanceMsg.color
+                ? 'bg-blue-50 border-blue-500 shadow-lg shadow-blue-200'
+                : 'bg-gray-50 border-gray-500 shadow-lg shadow-gray-200'
             }`}
             style={{
               animation: performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
                 ? 'pulse-slow 3s ease-in-out infinite'
                 : performanceMsg.type === 'excellent' || performanceMsg.type === 'good'
                 ? 'pulse-slow 4s ease-in-out infinite'
-                : 'none',
-              boxShadow: performanceMsg.type === 'warning' || performanceMsg.type === 'caution'
-                ? '0 0 20px rgba(239, 68, 68, 0.3)'
-                : performanceMsg.type === 'excellent'
-                ? '0 0 20px rgba(34, 197, 94, 0.3)'
-                : performanceMsg.type === 'good'
-                ? '0 0 20px rgba(59, 130, 246, 0.3)'
                 : 'none'
             }}
           >
-            <span className="mr-2">{performanceMsg.icon}</span>
-            {performanceMsg.message}
+            <p className={`text-sm font-semibold ${
+              performanceMsg.type === 'warning'
+                ? 'text-red-800'
+                : performanceMsg.type === 'caution'
+                ? 'text-orange-800'
+                : performanceMsg.type === 'excellent'
+                ? 'text-green-800'
+                : performanceMsg.type === 'good'
+                ? 'text-blue-800'
+                : 'text-gray-800'
+            }`}>
+              <span className="mr-2">{performanceMsg.icon}</span>
+              {performanceMsg.message}
+            </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
