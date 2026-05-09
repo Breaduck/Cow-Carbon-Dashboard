@@ -31,8 +31,79 @@ export function GasGauges({ farm }: GasGaugesProps) {
     currentValues.NH3 /= activeSensors.length;
   }
 
+  // 경고/주의 상태 확인 및 인사이트 생성
+  const insights: Array<{ gas: string; level: string; action: string; severity: 'warning' | 'caution' }> = [];
+
+  (Object.keys(GAS_INFO) as GasType[]).forEach(gasType => {
+    const value = currentValues[gasType];
+    const maxValue = gasType === 'CO2' ? 800 : gasType === 'N2O' ? 1 : gasType === 'CH4' ? 100 : 50;
+    const percentage = Math.min((value / maxValue) * 100, 100);
+
+    if (percentage >= 80) {
+      const gasName = GAS_INFO[gasType].nameKo;
+      let action = '';
+
+      if (gasType === 'CH4') {
+        action = '즉시 환기 시스템 가동 및 창문 개방하세요';
+      } else if (gasType === 'CO2') {
+        action = '즉시 환기를 실시하고 가축 스트레스 확인하세요';
+      } else if (gasType === 'N2O') {
+        action = '분뇨 처리 및 환기 시스템을 즉시 점검하세요';
+      } else if (gasType === 'NH3') {
+        action = '암모니아 농도 위험 - 즉시 환기하고 분뇨를 제거하세요';
+      }
+
+      insights.push({ gas: gasName, level: '경고', action, severity: 'warning' });
+    } else if (percentage >= 60) {
+      const gasName = GAS_INFO[gasType].nameKo;
+      let action = '';
+
+      if (gasType === 'CH4') {
+        action = '환기 시스템 가동 시간을 늘리세요';
+      } else if (gasType === 'CO2') {
+        action = '환기 시스템을 점검하고 가동 시간을 조정하세요';
+      } else if (gasType === 'N2O') {
+        action = '분뇨 처리 주기를 확인하고 단축하세요';
+      } else if (gasType === 'NH3') {
+        action = '분뇨 제거 주기를 단축하고 환기를 강화하세요';
+      }
+
+      insights.push({ gas: gasName, level: '주의', action, severity: 'caution' });
+    }
+  });
+
   return (
     <Card title="실시간 가스 농도" padding="lg">
+      {/* 인사이트 알림 */}
+      {insights.length > 0 && (
+        <div className="mb-4 space-y-2">
+          {insights.map((insight, idx) => (
+            <div
+              key={idx}
+              className={`p-3 rounded-lg border-2 ${
+                insight.severity === 'warning'
+                  ? 'bg-red-50 border-red-500 animate-pulse'
+                  : 'bg-yellow-50 border-yellow-500'
+              }`}
+            >
+              <div className="flex items-start gap-2">
+                <svg className={`w-5 h-5 flex-shrink-0 mt-0.5 ${insight.severity === 'warning' ? 'text-red-600' : 'text-yellow-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div className="flex-1">
+                  <p className={`text-sm font-bold mb-1 ${insight.severity === 'warning' ? 'text-red-900' : 'text-yellow-900'}`}>
+                    {insight.gas} {insight.level}
+                  </p>
+                  <p className={`text-sm font-semibold ${insight.severity === 'warning' ? 'text-red-800' : 'text-yellow-800'}`}>
+                    ⚠️ {insight.action}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         {(Object.keys(GAS_INFO) as GasType[]).map(gasType => {
           const info = GAS_INFO[gasType];
@@ -40,8 +111,15 @@ export function GasGauges({ farm }: GasGaugesProps) {
           const maxValue = gasType === 'CO2' ? 800 : gasType === 'N2O' ? 1 : gasType === 'CH4' ? 100 : 50;
           const percentage = Math.min((value / maxValue) * 100, 100);
 
+          const status = percentage < 60 ? 'normal' : percentage < 80 ? 'caution' : 'warning';
+          const borderColor = status === 'warning' ? 'border-red-500' : status === 'caution' ? 'border-yellow-500' : 'border-gray-200';
+          const shouldBlink = status === 'warning' || status === 'caution';
+
           return (
-            <div key={gasType} className="p-4 rounded-xl bg-gray-50">
+            <div
+              key={gasType}
+              className={`p-4 rounded-xl bg-gray-50 border-2 ${borderColor} ${shouldBlink ? 'animate-pulse' : ''}`}
+            >
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <p className="text-xs text-gray-500">{info.nameKo}</p>

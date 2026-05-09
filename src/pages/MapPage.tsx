@@ -65,16 +65,21 @@ export function MapPage() {
   const [mapZoom, setMapZoom] = useState(7);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 지도에 표시할 농장 (필터가 없으면 전체, 있으면 필터링된 것)
+  // 지도에 표시할 농장 (필터가 없으면 아무것도 표시 안 함)
   const hasFilters = filters.sido.length > 0 || filters.livestock.length > 0 || filters.grade.length > 0 || searchQuery.length > 0;
 
   // 검색어 필터링 추가
   const displayFarms = useMemo(() => {
-    let result = hasFilters ? filteredFarms : farms;
+    // 필터가 하나도 없으면 빈 배열 반환
+    if (!hasFilters) {
+      return [];
+    }
+
+    let result = filteredFarms;
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(farm =>
+      result = farms.filter(farm =>
         farm.name.toLowerCase().includes(query) ||
         farm.owner.toLowerCase().includes(query) ||
         farm.location.sido.includes(query)

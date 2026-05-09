@@ -236,7 +236,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
           );
         })}
 
-        {/* 외부 기준선 센서 위치 */}
+        {/* 외부 센서 위치 */}
         {outdoorSensors.map((sensor) => {
           const x = sensor.location.x;
           const y = sensor.location.y;
@@ -261,24 +261,21 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
         })}
       </div>
 
-      <div className="mt-4 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-gray-600">고정 센서 {indoorSensors.length}개</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span className="text-gray-600">외부 기준선 {outdoorSensors.length}개</span>
-          </div>
-          {(farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle') && (
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-amber-700" />
-              <span className="text-gray-600">개체 캡슐 센서 {layout.buildings.filter(b => b.label.includes('우사')).length * (farm.size === 'large' ? 18 : 12)}개</span>
-            </div>
-          )}
+      <div className="mt-4 flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <span className="text-gray-600">고정 센서</span>
         </div>
-        <span className="text-gray-500">총 {sensors.length + (farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle' ? layout.buildings.filter(b => b.label.includes('우사')).length * (farm.size === 'large' ? 18 : 12) : 0)}개 센서</span>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-blue-500" />
+          <span className="text-gray-600">외부 센서</span>
+        </div>
+        {(farm.livestock.type === 'beef_cattle' || farm.livestock.type === 'dairy_cattle') && (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-green-700" />
+            <span className="text-gray-600">개체 캡슐 센서</span>
+          </div>
+        )}
       </div>
     </Card>
   );
