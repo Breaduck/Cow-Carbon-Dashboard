@@ -23,6 +23,24 @@ export function RegionalStatsPage() {
   const { farms, alerts } = useStore();
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
+  // 지역명 축약 (지도와 동일)
+  const getShortRegionName = (region: string) => {
+    const shortNames: Record<string, string> = {
+      '울산광역시': '울산',
+      '세종특별자치시': '세종',
+      '강원특별자치도': '강원',
+      '경기도': '경기',
+      '충청북도': '충북',
+      '충청남도': '충남',
+      '경상북도': '경북',
+      '경상남도': '경남',
+      '전라남도': '전남',
+      '전북특별자치도': '전북',
+      '제주특별자치도': '제주',
+    };
+    return shortNames[region] || region;
+  };
+
   // 지역별 통계 계산
   const regionalStats = useMemo(() => {
     return REGION_ORDER.map(region => {
@@ -33,7 +51,7 @@ export function RegionalStatsPage() {
 
       return {
         region,
-        regionShort: region.replace(/특별시|광역시|특별자치시|특별자치도|도$/g, ''),
+        regionShort: getShortRegionName(region),
         total: regionFarms.length,
         beef: beefCount,
         pig: pigCount,
