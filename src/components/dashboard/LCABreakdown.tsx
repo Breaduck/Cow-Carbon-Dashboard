@@ -194,7 +194,7 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
     { name: '분뇨 배출', value: directEmissions.manure * periodMultiplier, prev: previousData.directEmissions.manure * periodMultiplier, color: '#FA8072', type: 'direct' },
     { name: '전력', value: indirectEmissions.electricity * periodMultiplier, prev: previousData.indirectEmissions.electricity * periodMultiplier, color: '#95E1D3', type: 'indirect' },
     { name: '연료', value: indirectEmissions.fuel * periodMultiplier, prev: previousData.indirectEmissions.fuel * periodMultiplier, color: '#FFE66D', type: 'indirect' },
-    { name: '기타', value: indirectEmissions.other * periodMultiplier, prev: previousData.indirectEmissions.other * periodMultiplier, color: '#C7CEEA', type: 'indirect' },
+    { name: '기타 간접배출', value: indirectEmissions.other * periodMultiplier, prev: previousData.indirectEmissions.other * periodMultiplier, color: '#C7CEEA', type: 'indirect', tooltip: '비료, 약품, 수도 등' },
   ];
 
   const maxValue = Math.max(...categories.map(c => c.value));
@@ -365,14 +365,16 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                   </h5>
 
                   {/* 감축 가능량 */}
-                  <div className="flex items-center gap-2 mt-3">
-                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                    <span className="text-sm font-bold text-green-700">
-                      {suggestion.expectedReduction.toFixed(0)}kg 감축
-                    </span>
-                  </div>
+                  {suggestion.expectedReduction > 0 && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                      <span className="text-sm font-bold text-green-700">
+                        즉시 조치 시 최대 {suggestion.expectedReduction.toFixed(0)}kg 감축 가능
+                      </span>
+                    </div>
+                  )}
 
                   {/* 클릭 힌트 */}
                   <div className="mt-3 text-xs text-gray-500 flex items-center gap-1">
@@ -407,6 +409,9 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                       style={{ backgroundColor: category.color }}
                     />
                     <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                    {(category as any).tooltip && (
+                      <span className="text-xs text-gray-500">({(category as any).tooltip})</span>
+                    )}
                     <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
                       {category.type === 'direct' ? '직접' : '간접'}
                     </span>
@@ -503,19 +508,22 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
             </div>
 
             {/* 예상 감축량 */}
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                <div>
-                  <p className="text-sm text-green-700 font-medium">예상 감축량</p>
-                  <p className="text-2xl font-bold text-green-900">
-                    {selectedSuggestion.expectedReduction.toFixed(0)} kg CO₂eq
-                  </p>
+            {selectedSuggestion.expectedReduction > 0 && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-green-700 font-medium">즉시 조치 시 최대 감축 가능량</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      {selectedSuggestion.expectedReduction.toFixed(0)} kg CO₂eq
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">아래 실행 방법을 따르면 이 정도 감축 효과를 기대할 수 있습니다</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* 실행 방법 */}
             <div>

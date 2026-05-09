@@ -131,26 +131,6 @@ export function MapPage() {
     setFilter('livestock', currentLivestock);
   }, [filters.livestock, setFilter]);
 
-  const handleRegionClick = useCallback((region: string) => {
-    // 현재 필터에 해당 지역이 있으면 제거, 없으면 단일 선택
-    const isSelected = filters.sido.includes(region);
-
-    if (isSelected) {
-      // 선택 해제 - 전국 뷰로 복귀
-      setFilter('sido', []);
-      setMapCenter(defaultCenter);
-      setMapZoom(7);
-    } else {
-      // 단일 선택 - 해당 지역만 표시
-      setFilter('sido', [region]);
-      const regionCenter = REGION_CENTERS[region];
-      if (regionCenter) {
-        setMapCenter({ lat: regionCenter.lat, lng: regionCenter.lng });
-        setMapZoom(regionCenter.zoom);
-      }
-    }
-  }, [filters.sido, setFilter]);
-
   // 디버깅: 농장 데이터 확인
   console.log('MapPage Debug:', {
     totalFarms: displayFarms.length,

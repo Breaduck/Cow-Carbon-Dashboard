@@ -73,8 +73,11 @@ export function GasGauges({ farm }: GasGaugesProps) {
   });
 
   return (
-    <Card title="실시간 가스 농도" padding="lg">
-      <p className="text-xs text-gray-500 mb-4">최근 1시간 평균</p>
+    <Card padding="lg">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-gray-900">실시간 가스 농도</h3>
+        <span className="text-xs text-gray-500">최근 1시간 평균</span>
+      </div>
       {/* 인사이트 알림 */}
       {insights.length > 0 && (
         <div className="mb-4 space-y-2">

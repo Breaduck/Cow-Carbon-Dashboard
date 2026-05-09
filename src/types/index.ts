@@ -126,7 +126,7 @@ export interface EmissionComparison {
 
 // 개선 제안
 export interface ImprovementSuggestion {
-  category: 'feed' | 'electricity' | 'fuel' | 'manure' | 'livestock';
+  category: 'electricity' | 'fuel' | 'manure' | 'livestock';
   severity: 'high' | 'medium' | 'low';
   title: string;
   description: string;
