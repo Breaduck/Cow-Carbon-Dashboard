@@ -201,7 +201,7 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
                   onMouseLeave={() => setHoveredCapsule(null)}
                 >
                   {/* 캡슐 센서 (초록 점) */}
-                  <div className="w-2 h-2 rounded-full bg-green-500 cursor-pointer" />
+                  <div className="w-1 h-1 rounded-full bg-green-500 cursor-pointer" />
 
                   {/* 툴팁 */}
                   {hoveredCapsule === cattleId && (
