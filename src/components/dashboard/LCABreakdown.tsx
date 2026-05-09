@@ -38,7 +38,7 @@ function generateImprovementSuggestions(
   const elecUsageIncrease = current.monthlyInputs.electricityUsage - previous.monthlyInputs.electricityUsage;
   const elecUsagePercent = previous.monthlyInputs.electricityUsage === 0 ? 0 : (elecUsageIncrease / previous.monthlyInputs.electricityUsage) * 100;
 
-  if (elecIncrease > 0 && elecUsagePercent > 0.5) {
+  if (elecIncrease > 0 && elecUsagePercent > 5) {
     const increasePercent = ((elecIncrease / previous.indirectEmissions.electricity) * 100).toFixed(1);
     const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
 
@@ -66,7 +66,7 @@ function generateImprovementSuggestions(
   const fuelUsagePercent = (previous.monthlyInputs.dieselUsage + previous.monthlyInputs.lpgUsage) === 0 ? 0 :
     (totalFuelIncrease / (previous.monthlyInputs.dieselUsage + previous.monthlyInputs.lpgUsage)) * 100;
 
-  if (fuelIncrease > 0 && fuelUsagePercent > 0.5) {
+  if (fuelIncrease > 0 && fuelUsagePercent > 5) {
     const increasePercent = ((fuelIncrease / previous.indirectEmissions.fuel) * 100).toFixed(1);
     const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
 
@@ -89,7 +89,7 @@ function generateImprovementSuggestions(
   const manureIncrease = current.directEmissions.manure - previous.directEmissions.manure;
   const manurePercent = previous.directEmissions.manure === 0 ? 0 : (manureIncrease / previous.directEmissions.manure) * 100;
 
-  if (manureIncrease > 0 && manurePercent > 0.5) {
+  if (manureIncrease > 0 && manurePercent > 5) {
     const increasePercent = ((manureIncrease / previous.directEmissions.manure) * 100).toFixed(1);
     const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
     const processingStatus = manureIncrease > previous.directEmissions.manure * 0.15 ? '피트 내 슬러리 미처리 확인' : '분뇨 처리 주기 점검 필요';
@@ -114,7 +114,7 @@ function generateImprovementSuggestions(
   const livestockIncrease = current.directEmissions.livestock - previous.directEmissions.livestock;
   const livestockPercent = previous.directEmissions.livestock === 0 ? 0 : (livestockIncrease / previous.directEmissions.livestock) * 100;
 
-  if (livestockIncrease > 0 && livestockPercent > 0.5) {
+  if (livestockIncrease > 0 && livestockPercent > 3) {
     const increasePercent = ((livestockIncrease / previous.directEmissions.livestock) * 100).toFixed(1);
     const actionDeadline = period === 'daily' ? '오늘 안에' : period === 'weekly' ? '이번 주 안에' : '이번 달 안에';
     const headCountStatus = livestockIncrease > previous.directEmissions.livestock * 0.05 ? '사육 두수 증가 또는 장내발효 증가' : '장내발효 미세 증가';
