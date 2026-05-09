@@ -35,8 +35,16 @@ export function KoreaRegionMap({ regionalStats, onRegionClick }: KoreaRegionMapP
         className="w-full h-full"
         style={{ maxHeight: '600px' }}
       >
-        {/* 한국 윤곽선 (간단한 배경) */}
-        <rect x="120" y="100" width="260" height="420" rx="20" fill="#f3f4f6" opacity="0.3" />
+        {/* 한국 지도 윤곽선 */}
+        <path
+          d="M 200 80 L 240 70 L 280 90 L 320 80 L 350 100 L 360 140 L 340 180 L 350 220 L 320 260 L 330 300 L 310 340 L 290 380 L 270 420 L 240 440 L 220 460 L 180 480 L 160 500 L 140 480 L 130 440 L 140 400 L 120 360 L 130 320 L 150 280 L 140 240 L 160 200 L 180 160 L 200 120 Z"
+          fill="#ffffff"
+          stroke="#d1d5db"
+          strokeWidth="2"
+          opacity="0.9"
+        />
+        {/* 제주도 */}
+        <ellipse cx="200" cy="480" rx="30" ry="15" fill="#ffffff" stroke="#d1d5db" strokeWidth="1.5" opacity="0.9" />
 
         {/* 권역별 원형 마커 */}
         {regionalStats.map((stat) => {
