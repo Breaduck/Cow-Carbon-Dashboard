@@ -41,25 +41,14 @@ const getShortRegionName = (region: string) => {
 
 export function KoreaRegionMap({ regionalStats, onRegionClick }: KoreaRegionMapProps) {
   return (
-    <div className="w-full h-full flex items-center justify-center relative bg-white">
+    <div className="w-full h-full flex items-center justify-center relative bg-gray-50">
       {/* 한국 지도 배경 이미지 */}
       <div
         className="absolute inset-0 bg-contain bg-center bg-no-repeat"
         style={{
           backgroundImage: 'url(/korea-map.png)',
-          opacity: 0.12,
-          filter: 'grayscale(100%) brightness(1.1)'
-        }}
-      />
-
-      {/* 권역 구분선 오버레이 */}
-      <div
-        className="absolute inset-0 bg-contain bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(/korea-map.png)',
-          opacity: 0.08,
-          filter: 'grayscale(100%) brightness(1.3)',
-          mixBlendMode: 'multiply'
+          opacity: 0.35,
+          filter: 'grayscale(100%)'
         }}
       />
 
