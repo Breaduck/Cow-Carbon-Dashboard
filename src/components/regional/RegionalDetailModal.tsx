@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Modal } from '../common/Modal';
 import { Farm, Alert, LIVESTOCK_INFO } from '../../types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { useStore } from '../../store/useStore';
 
 interface RegionalDetailModalProps {
   isOpen: boolean;
@@ -68,6 +70,9 @@ export function RegionalDetailModal({
   farms,
   alerts,
 }: RegionalDetailModalProps) {
+  const navigate = useNavigate();
+  const { selectFarm } = useStore();
+  const [selectedIssue, setSelectedIssue] = useState<{category: string; farms: string[]} | null>(null);
   const regionalData = useMemo(() => {
     if (!region) return null;
 
@@ -255,9 +260,44 @@ export function RegionalDetailModal({
                     <div className="text-sm font-bold text-orange-700">{issue.count}건</div>
                   </div>
                   <div className="text-sm text-orange-800">
-                    영향 농가: {issue.farms.slice(0, 3).join(', ')}
-                    {issue.farms.length > 3 && ` 외 ${issue.farms.length - 3}개`}
+                    <button
+                      onClick={() => setSelectedIssue(selectedIssue?.category === issue.category ? null : issue)}
+                      className="hover:underline cursor-pointer font-medium"
+                    >
+                      영향 농가: {issue.farms.slice(0, 3).join(', ')}
+                      {issue.farms.length > 3 && ` 외 ${issue.farms.length - 3}개`}
+                      <span className="ml-1">{selectedIssue?.category === issue.category ? '▲' : '▼'}</span>
+                    </button>
                   </div>
+
+                  {/* 농가 목록 확장 */}
+                  {selectedIssue?.category === issue.category && (
+                    <div className="mt-3 pt-3 border-t border-orange-300">
+                      <div className="grid grid-cols-2 gap-2">
+                        {issue.farms.map((farmName) => {
+                          const farm = regionalData.regionalFarms.find(f => f.name === farmName);
+                          if (!farm) return null;
+
+                          return (
+                            <button
+                              key={farm.id}
+                              onClick={() => {
+                                selectFarm(farm.id);
+                                navigate('/dashboard');
+                                onClose();
+                              }}
+                              className="px-3 py-2 bg-white border border-orange-300 rounded-lg hover:bg-orange-100 hover:border-orange-400 transition-colors text-left text-sm"
+                            >
+                              <div className="font-medium text-orange-900">{farmName}</div>
+                              <div className="text-xs text-orange-700 mt-0.5">
+                                {LIVESTOCK_INFO[farm.livestock.type].nameKo} · {farm.certification.grade}등급
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

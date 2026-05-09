@@ -38,9 +38,12 @@ export function MapPage() {
   const navigate = useNavigate();
   const { farms, filteredFarms, selectFarm, filters, setFilter } = useStore();
   const [selectedFarm, setSelectedFarm] = useState<Farm | null>(null);
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
+
+  // 환경 변수 우선, 없으면 localStorage 확인
+  const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  const [apiKey, setApiKey] = useState(() => envApiKey || localStorage.getItem(STORAGE_KEY) || '');
   const [inputKey, setInputKey] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(!apiKey);
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!apiKey && !envApiKey);
   const [mapCenter] = useState(defaultCenter);
   const [mapZoom] = useState(7);
   const [searchQuery, setSearchQuery] = useState('');
