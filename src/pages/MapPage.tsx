@@ -286,8 +286,12 @@ export function MapPage() {
                 </svg>
               }
               onClick={() => {
-                // 모든 축종 필터 추가하여 전체 농장 표시
-                setFilter('livestock', ['beef_cattle', 'pig', 'dairy_cattle']);
+                // 토글: 모든 축종이 선택되어 있으면 초기화, 아니면 전체 선택
+                if (filters.livestock.length === 3) {
+                  setFilter('livestock', []);
+                } else {
+                  setFilter('livestock', ['beef_cattle', 'pig', 'dairy_cattle']);
+                }
                 setFilter('grade', []);
                 setFilter('sido', []);
                 setSearchQuery('');

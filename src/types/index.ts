@@ -259,28 +259,28 @@ export const GAS_INFO: Record<GasType, {
   CH4: {
     name: 'Methane',
     nameKo: '메탄',
-    color: '#FF6B6B',
+    color: '#DC2626',
     unit: 'ppm',
     gwp: 28,
   },
   CO2: {
     name: 'Carbon Dioxide',
     nameKo: '이산화탄소',
-    color: '#4ECDC4',
+    color: '#6B7280',
     unit: 'ppm',
     gwp: 1,
   },
   N2O: {
     name: 'Nitrous Oxide',
     nameKo: '아산화질소',
-    color: '#FFE66D',
+    color: '#F59E0B',
     unit: 'ppb',
     gwp: 265,
   },
   NH3: {
     name: 'Ammonia',
     nameKo: '암모니아',
-    color: '#95E1D3',
+    color: '#3B82F6',
     unit: 'ppm',
     gwp: 0, // 직접 온실가스 아님
   },
