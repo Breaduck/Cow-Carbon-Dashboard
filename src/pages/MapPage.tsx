@@ -63,12 +63,9 @@ export function MapPage() {
   const [inputKey, setInputKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(!apiKey);
   const [mapCenter, setMapCenter] = useState(defaultCenter);
-  const [mapZoom, setMapZoom] = useState(7);
+  const [mapZoom] = useState(7);
   const [searchQuery, setSearchQuery] = useState('');
   const [showStats, setShowStats] = useState(true);
-
-  // 지도에 표시할 농장
-  const hasActiveFilters = filters.sido.length > 0 || filters.livestock.length > 0 || filters.grade.length > 0 || searchQuery.length > 0;
 
   // 검색어 필터링 추가
   const displayFarms = useMemo(() => {
