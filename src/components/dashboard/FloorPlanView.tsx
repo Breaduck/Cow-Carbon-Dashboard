@@ -143,26 +143,21 @@ export function FloorPlanView({ farm }: FloorPlanViewProps) {
                   <line x1={building.x + building.width * 2 / 3} y1={building.y + building.height * 0.55} x2={building.x + building.width * 2 / 3} y2={building.y + building.height} stroke="#d1d5db" strokeWidth="1" strokeDasharray="3,2" />
 
                   {/* 소 개체 */}
-                  {getCattlePositions(building).map((pos, i) => {
-                    const cattleId = `${building.id}-cattle-${i}`;
-                    const toPercent = (val: number, max: number) => (val / max) * 100;
-
-                    return (
-                      <g key={i}>
-                        {/* 소 이모티콘 */}
-                        <text
-                          x={pos.x}
-                          y={pos.y}
-                          fontSize="14"
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          style={{ userSelect: 'none' }}
-                        >
-                          🐄
-                        </text>
-                      </g>
-                    );
-                  })}
+                  {getCattlePositions(building).map((pos, i) => (
+                    <g key={i}>
+                      {/* 소 이모티콘 */}
+                      <text
+                        x={pos.x}
+                        y={pos.y}
+                        fontSize="14"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        style={{ userSelect: 'none' }}
+                      >
+                        🐄
+                      </text>
+                    </g>
+                  ))}
                 </>
               )}
 
