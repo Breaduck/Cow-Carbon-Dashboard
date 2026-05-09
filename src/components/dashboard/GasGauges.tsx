@@ -80,11 +80,14 @@ export function GasGauges({ farm }: GasGaugesProps) {
           {insights.map((insight, idx) => (
             <div
               key={idx}
-              className={`p-3 rounded-lg border-2 ${
+              className={`p-3 rounded-lg border-2 transition-all ${
                 insight.severity === 'warning'
-                  ? 'bg-red-50 border-red-500 animate-pulse'
-                  : 'bg-yellow-50 border-yellow-500'
+                  ? 'bg-red-50 border-red-500 shadow-lg shadow-red-200'
+                  : 'bg-yellow-50 border-yellow-500 shadow-lg shadow-yellow-200'
               }`}
+              style={{
+                animation: insight.severity === 'warning' ? 'pulse-slow 3s ease-in-out infinite' : 'pulse-slow 4s ease-in-out infinite'
+              }}
             >
               <div className="flex items-start gap-2">
                 <svg className={`w-5 h-5 flex-shrink-0 mt-0.5 ${insight.severity === 'warning' ? 'text-red-600' : 'text-yellow-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +121,11 @@ export function GasGauges({ farm }: GasGaugesProps) {
           return (
             <div
               key={gasType}
-              className={`p-4 rounded-xl bg-gray-50 border-2 ${borderColor} ${shouldBlink ? 'animate-pulse' : ''}`}
+              className={`p-4 rounded-xl bg-gray-50 border-2 ${borderColor} transition-all`}
+              style={shouldBlink ? {
+                animation: status === 'warning' ? 'pulse-slow 3s ease-in-out infinite' : 'pulse-slow 4s ease-in-out infinite',
+                boxShadow: status === 'warning' ? '0 0 20px rgba(239, 68, 68, 0.3)' : '0 0 20px rgba(234, 179, 8, 0.3)'
+              } : {}}
             >
               <div className="flex items-center justify-between mb-3">
                 <div>

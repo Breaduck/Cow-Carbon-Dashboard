@@ -23,19 +23,88 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
     }, 1000);
   };
 
+  // 성과 메시지 생성
+  const getPerformanceMessage = () => {
+    const { directEmissions, indirectEmissions } = farm.lcaData;
+    const { yesterday } = farm.lcaHistory;
+
+    // 현재와 어제 배출량 비교
+    const currentTotal = directEmissions.livestock + directEmissions.manure +
+                        indirectEmissions.electricity + indirectEmissions.fuel + indirectEmissions.other;
+    const yesterdayTotal = yesterday.directEmissions.livestock + yesterday.directEmissions.manure +
+                          yesterday.indirectEmissions.electricity + yesterday.indirectEmissions.fuel +
+                          yesterday.indirectEmissions.other;
+
+    const changePercent = yesterdayTotal === 0 ? 0 : ((currentTotal - yesterdayTotal) / yesterdayTotal) * 100;
+
+    // A등급이면서 배출량 감소 또는 안정적
+    if (farm.certification.grade === 'A' && changePercent <= 2) {
+      return {
+        type: 'excellent',
+        icon: '🎉',
+        message: '지금처럼만 유지하면 저탄소 농장 유지 가능해요!',
+        color: 'bg-green-50 border-green-500 text-green-800'
+      };
+    }
+    // B등급이면서 배출량 감소
+    else if (farm.certification.grade === 'B' && changePercent < 0) {
+      return {
+        type: 'good',
+        icon: '👍',
+        message: '좋아요! 이대로 계속 개선하면 A등급 달성 가능합니다',
+        color: 'bg-blue-50 border-blue-500 text-blue-800'
+      };
+    }
+    // 배출량이 크게 증가 (5% 이상)
+    else if (changePercent > 5) {
+      return {
+        type: 'warning',
+        icon: '⚠️',
+        message: '주의! 이대로 가면 인증 등급이 하락할 수 있어요',
+        color: 'bg-red-50 border-red-500 text-red-800'
+      };
+    }
+    // C등급
+    else if (farm.certification.grade === 'C') {
+      return {
+        type: 'caution',
+        icon: '😟',
+        message: '개선이 필요합니다. 인증이 사라질 수 있어요',
+        color: 'bg-orange-50 border-orange-500 text-orange-800'
+      };
+    }
+    // 기본 (안정적)
+    else {
+      return {
+        type: 'stable',
+        icon: '✓',
+        message: '안정적으로 관리되고 있어요',
+        color: 'bg-gray-50 border-gray-500 text-gray-800'
+      };
+    }
+  };
+
+  const performanceMsg = getPerformanceMessage();
+
   return (
     <>
       <Card padding="lg" className="backdrop-blur-xl bg-white/80">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-3">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: `${livestockInfo.color}15` }}>
               {livestockInfo.icon}
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{farm.name}</h2>
               <p className="text-sm text-gray-500 mt-0.5">{farm.owner} 대표</p>
             </div>
+          </div>
+
+          {/* 성과 메시지 */}
+          <div className={`mb-4 px-4 py-3 rounded-lg border-2 ${performanceMsg.color} font-medium text-sm`}>
+            <span className="mr-2">{performanceMsg.icon}</span>
+            {performanceMsg.message}
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

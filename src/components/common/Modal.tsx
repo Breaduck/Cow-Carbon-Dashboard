@@ -53,20 +53,20 @@ export function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal content */}
       <div
-        className={`relative w-full ${sizeClasses[size]} mx-4 bg-white rounded-xl shadow-xl max-h-[90vh] overflow-hidden flex flex-col`}
+        className={`relative w-full ${sizeClasses[size]} my-8 bg-white rounded-xl shadow-xl max-h-[85vh] overflow-hidden flex flex-col`}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
@@ -80,7 +80,7 @@ export function Modal({
         )}
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6" style={{ overscrollBehavior: 'contain' }}>
           {children}
         </div>
       </div>
