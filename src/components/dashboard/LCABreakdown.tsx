@@ -163,9 +163,9 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
     }
   }, [period, farm.lcaHistory]);
 
-  // 이전 기간 총 배출량 계산
-  const prevTotalDirect = previousData.directEmissions.livestock + previousData.directEmissions.manure;
-  const prevTotalIndirect = previousData.indirectEmissions.electricity + previousData.indirectEmissions.fuel + previousData.indirectEmissions.other;
+  // 이전 기간 총 배출량 계산 (사료 제외)
+  const prevTotalDirect = (previousData.directEmissions.livestock + previousData.directEmissions.manure) * periodMultiplier;
+  const prevTotalIndirect = (previousData.indirectEmissions.electricity + previousData.indirectEmissions.fuel + previousData.indirectEmissions.other) * periodMultiplier;
   const prevTotalEmissions = prevTotalDirect + prevTotalIndirect;
 
   // 비교 계산
@@ -190,11 +190,11 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
   const emissionScore = Math.min(70, Math.max(0, (reductionRate / 18) * 70)); // 18% 감축 시 70점
 
   const categories = [
-    { name: '가축 배출', value: directEmissions.livestock, prev: previousData.directEmissions.livestock, color: '#FF6B6B', type: 'direct' },
-    { name: '분뇨 배출', value: directEmissions.manure, prev: previousData.directEmissions.manure, color: '#FA8072', type: 'direct' },
-    { name: '전력', value: indirectEmissions.electricity, prev: previousData.indirectEmissions.electricity, color: '#95E1D3', type: 'indirect' },
-    { name: '연료', value: indirectEmissions.fuel, prev: previousData.indirectEmissions.fuel, color: '#FFE66D', type: 'indirect' },
-    { name: '기타', value: indirectEmissions.other, prev: previousData.indirectEmissions.other, color: '#C7CEEA', type: 'indirect' },
+    { name: '가축 배출', value: directEmissions.livestock * periodMultiplier, prev: previousData.directEmissions.livestock * periodMultiplier, color: '#FF6B6B', type: 'direct' },
+    { name: '분뇨 배출', value: directEmissions.manure * periodMultiplier, prev: previousData.directEmissions.manure * periodMultiplier, color: '#FA8072', type: 'direct' },
+    { name: '전력', value: indirectEmissions.electricity * periodMultiplier, prev: previousData.indirectEmissions.electricity * periodMultiplier, color: '#95E1D3', type: 'indirect' },
+    { name: '연료', value: indirectEmissions.fuel * periodMultiplier, prev: previousData.indirectEmissions.fuel * periodMultiplier, color: '#FFE66D', type: 'indirect' },
+    { name: '기타', value: indirectEmissions.other * periodMultiplier, prev: previousData.indirectEmissions.other * periodMultiplier, color: '#C7CEEA', type: 'indirect' },
   ];
 
   const maxValue = Math.max(...categories.map(c => c.value));

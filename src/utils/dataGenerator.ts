@@ -309,23 +309,23 @@ function generateLCAData(
   size: FarmSize,
   random: SeededRandom
 ): LCAData {
-  // 축종별 배출계수 (kg CO2eq/두/월)
+  // 축종별 배출계수 (kg CO2eq/두/월) - IPCC 가이드라인 기준
   const emissionFactors = {
     beef_cattle: {
-      livestock: 85,    // 가축 직접 배출 (장내발효 CH4)
-      manure: 25,       // 분뇨 배출
-      feedPerHead: 300, // 사료 kg/두/월
+      livestock: 4.5,    // 가축 직접 배출 (장내발효 CH4): ~54 kg/year
+      manure: 1.2,       // 분뇨 배출: ~14 kg/year
+      feedPerHead: 300,  // 사료 kg/두/월
       feedEmission: 0.8, // 사료 배출계수 kg CO2eq/kg
     },
     dairy_cattle: {
-      livestock: 110,
-      manure: 35,
+      livestock: 5.8,    // ~70 kg/year
+      manure: 1.8,       // ~22 kg/year
       feedPerHead: 450,
       feedEmission: 0.9,
     },
     pig: {
-      livestock: 15,
-      manure: 8,
+      livestock: 0.12,   // ~1.5 kg/year (돼지는 장내발효 매우 적음)
+      manure: 0.5,       // ~6 kg/year
       feedPerHead: 90,
       feedEmission: 0.7,
     },
