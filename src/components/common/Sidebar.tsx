@@ -11,16 +11,24 @@ export function Sidebar() {
   const [touchEnd, setTouchEnd] = useState(0);
   const sidebarRef = useRef<HTMLElement>(null);
 
-  // 스와이프 감지
+  // 스와이프 감지 (버튼이나 링크가 아닌 경우에만)
   const handleTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    // 버튼이나 링크, input 등 인터랙티브 요소인 경우 스와이프 비활성화
+    if (target.tagName === 'BUTTON' || target.tagName === 'A' || target.tagName === 'INPUT' ||
+        target.closest('button') || target.closest('a')) {
+      return;
+    }
     setTouchStart(e.targetTouches[0].clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStart === 0) return; // touchStart가 없으면 무시
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
   const handleTouchEnd = () => {
+    if (touchStart === 0) return; // touchStart가 없으면 무시
     if (touchStart - touchEnd > 75) {
       // 왼쪽으로 75px 이상 스와이프
       toggleSidebar();
