@@ -96,8 +96,8 @@ export function FarmOverview({ farm }: FarmOverviewProps) {
               {livestockInfo.icon}
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{farm.name}</h2>
-              <p className="text-sm text-gray-500 mt-0.5">{farm.owner} 대표</p>
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 tracking-tight break-keep">{farm.name}</h2>
+              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{farm.owner} 대표</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 ml-auto">
               <div className="flex items-center gap-2 text-xs text-gray-600">
