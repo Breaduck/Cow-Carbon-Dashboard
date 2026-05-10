@@ -202,7 +202,7 @@ export function RegionalDetailModal({
                   key={farm.id}
                   onClick={() => {
                     selectFarm(farm.id);
-                    navigate('/dashboard');
+                    navigate(`/dashboard/${farm.id}`);
                     onClose();
                   }}
                   className={`p-3 rounded-lg border-2 hover:shadow-md transition-all text-left ${
@@ -339,7 +339,7 @@ export function RegionalDetailModal({
                               key={farm.id}
                               onClick={() => {
                                 selectFarm(farm.id);
-                                navigate('/dashboard');
+                                navigate(`/dashboard/${farm.id}`);
                                 onClose();
                               }}
                               className="px-3 py-2 bg-white border border-orange-300 rounded-lg hover:bg-orange-100 hover:border-orange-400 transition-colors text-left text-sm"
