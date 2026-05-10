@@ -272,15 +272,15 @@ export function MapPage() {
 
       {/* 상단 통계 카드 */}
       {showStats && (
-        <div className="p-3 bg-white border-b border-gray-200">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-2 sm:p-3 bg-white border-b border-gray-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
             <StatCard
               title="전체 인증 농장"
               value={dashboardStats.totalFarms}
               unit="개"
               color="green"
               icon={
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
               }
@@ -306,7 +306,7 @@ export function MapPage() {
                   stat.type === 'beef_cattle' ? 'yellow' :
                   stat.type === 'dairy_cattle' ? 'blue' : 'red'
                 }
-                icon={<span className="text-2xl">{stat.icon}</span>}
+                icon={<span className="text-lg sm:text-2xl">{stat.icon}</span>}
                 onClick={() => handleLivestockClick(stat.type)}
               />
             ))}

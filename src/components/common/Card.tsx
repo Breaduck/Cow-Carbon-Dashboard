@@ -80,15 +80,15 @@ export function StatCard({
 
   return (
     <div
-      className={`bg-white rounded-xl border border-gray-200 shadow-sm p-4 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+      className={`bg-white rounded-xl border border-gray-200 shadow-sm p-2 sm:p-4 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
       onClick={onClick}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500">{title}</p>
+          <p className="text-lg sm:text-2xl font-bold text-gray-900 mt-0.5 sm:mt-1">
             {value}
-            {unit && <span className="text-sm font-normal text-gray-500 ml-1">{unit}</span>}
+            {unit && <span className="text-xs sm:text-sm font-normal text-gray-500 ml-1">{unit}</span>}
           </p>
           {trend && (
             <p className={`text-sm mt-2 flex items-center gap-1 ${
@@ -108,8 +108,8 @@ export function StatCard({
           )}
         </div>
         {icon && (
-          <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-            <div className={iconColorClasses[color]}>{icon}</div>
+          <div className={`p-2 sm:p-3 rounded-lg ${colorClasses[color]}`}>
+            <div className={`${iconColorClasses[color]} text-sm sm:text-base`}>{icon}</div>
           </div>
         )}
       </div>
