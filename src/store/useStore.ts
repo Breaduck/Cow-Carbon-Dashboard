@@ -115,8 +115,8 @@ export const useStore = create<AppState>((set, get) => ({
   timeRange: 'day',
   setTimeRange: (range) => set({ timeRange: range }),
 
-  // 사이드바
-  isSidebarOpen: false,
+  // 사이드바 (데스크탑에서는 기본 열림, 모바일에서는 기본 닫힘)
+  isSidebarOpen: typeof window !== 'undefined' ? window.innerWidth >= 768 : true,
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 
   // 모달
