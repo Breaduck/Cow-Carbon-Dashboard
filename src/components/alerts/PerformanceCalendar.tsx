@@ -79,7 +79,7 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
 
     if (performance === 'good') {
       return {
-        title: '잘함',
+        title: '잘함\n(전일대비 유지/감소)',
         details: [
           '전일 대비 배출량 2.3% 감소',
           '목표치 대비 95% 달성',
@@ -89,7 +89,7 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
       };
     } else if (performance === 'mediocre') {
       return {
-        title: '보통',
+        title: '보통\n(5% 미만 증가)',
         details: [
           '전일 대비 배출량 3.1% 증가',
           '목표치 대비 88% 달성',
@@ -99,7 +99,7 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
       };
     } else {
       return {
-        title: '부족',
+        title: '부족\n(5% 이상 증가)',
         details: [
           '전일 대비 배출량 7.2% 증가',
           '목표치 대비 78% 달성',
@@ -187,9 +187,9 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
   };
 
   return (
-    <div className="mt-6">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="text-base font-bold text-gray-900">월간 성과 캘린더</h4>
+    <div className="mt-4 sm:mt-6">
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h4 className="text-sm sm:text-base font-bold text-gray-900">월간 성과 캘린더</h4>
         <button
           onClick={goToToday}
           className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
@@ -199,22 +199,22 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
       </div>
 
       {/* 월별 인사이트 */}
-      <div className={`mb-4 p-4 rounded-lg border-2 ${monthlyInsight.color}`}>
+      <div className={`mb-3 sm:mb-4 p-3 sm:p-4 rounded-lg border-2 ${monthlyInsight.color}`}>
         <div className="flex items-start gap-2">
-          <span className="text-2xl">{monthlyInsight.icon}</span>
-          <div className="flex-1">
-            <p className="font-semibold mb-2">{monthlyInsight.message}</p>
-            <div className="flex gap-4 text-sm">
+          <span className="text-xl sm:text-2xl flex-shrink-0">{monthlyInsight.icon}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm sm:text-base font-semibold mb-2">{monthlyInsight.message}</p>
+            <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
               <span className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 flex-shrink-0" />
                 잘함: {monthStats.good}일
               </span>
               <span className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500 flex-shrink-0" />
                 보통: {monthStats.mediocre}일
               </span>
               <span className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 flex-shrink-0" />
                 부족: {monthStats.poor}일
               </span>
             </div>
@@ -223,32 +223,32 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
       </div>
 
       {/* 캘린더 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
         {/* 년도/월 네비게이션 */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
           <button
             onClick={goToPreviousMonth}
             className="p-1 hover:bg-gray-100 rounded transition-colors"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="text-center font-bold text-gray-900">
+          <div className="text-center text-sm sm:text-base font-bold text-gray-900">
             {calendarData.year}년 {monthNames[calendarData.month]}
           </div>
           <button
             onClick={goToNextMonth}
             className="p-1 hover:bg-gray-100 rounded transition-colors"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
 
         {/* 요일 헤더 */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1.5 sm:mb-2">
           {dayNames.map(day => (
             <div key={day} className="text-center text-xs font-medium text-gray-600 py-1">
               {day}
@@ -257,9 +257,9 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
         </div>
 
         {/* 날짜 */}
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {calendarData.weeks.map((week, weekIdx) => (
-            <div key={weekIdx} className="grid grid-cols-7 gap-3">
+            <div key={weekIdx} className="grid grid-cols-7 gap-1.5 sm:gap-3">
               {week.map((date, dayIdx) => {
                 const performance = getDayPerformance(date);
                 const isToday = date.toDateString() === calendarData.today.toDateString();
@@ -271,14 +271,14 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
                 else if (performance === 'poor') bgColor = 'bg-red-500';
 
                 return (
-                  <div key={dayIdx} className="flex flex-col items-center gap-1">
+                  <div key={dayIdx} className="flex flex-col items-center gap-0.5 sm:gap-1">
                     {/* 성과 원 (큰 원) */}
                     <button
                       onClick={() => performance !== 'none' ? setSelectedDate(date) : null}
-                      className={`w-7 h-7 rounded-full ${bgColor} ${performance !== 'none' ? 'cursor-pointer hover:scale-110' : 'opacity-30'} transition-all flex items-center justify-center`}
+                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full ${bgColor} ${performance !== 'none' ? 'cursor-pointer hover:scale-110' : 'opacity-30'} transition-all flex items-center justify-center`}
                       disabled={performance === 'none'}
                     >
-                      {isToday && <div className="w-2 h-2 rounded-full bg-white" />}
+                      {isToday && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white" />}
                     </button>
                     {/* 날짜 숫자 */}
                     <span className={`text-xs ${isCurrentMonth ? 'text-gray-700' : 'text-gray-400'} ${isToday ? 'font-bold' : ''}`}>
@@ -293,18 +293,21 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
       </div>
 
       {/* 범례 */}
-      <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-600">
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 rounded bg-green-500" />
-          <span>잘함 (전일대비 유지/감소)</span>
+      <div className="mt-3 flex flex-col sm:flex-row items-start sm:items-center sm:justify-center gap-2 sm:gap-4 text-xs text-gray-600">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-green-500 flex-shrink-0" />
+          <span className="whitespace-pre-line">잘함
+(전일대비 유지/감소)</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 rounded bg-yellow-500" />
-          <span>보통 (5% 미만 증가)</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-yellow-500 flex-shrink-0" />
+          <span className="whitespace-pre-line">보통
+(5% 미만 증가)</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="w-4 h-4 rounded bg-red-500" />
-          <span>부족 (5% 이상 증가)</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 rounded bg-red-500 flex-shrink-0" />
+          <span className="whitespace-pre-line">부족
+(5% 이상 증가)</span>
         </div>
       </div>
 
@@ -315,11 +318,12 @@ export function PerformanceCalendar({ farm }: PerformanceCalendarProps) {
         if (!detail) return null;
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setSelectedDate(null)}>
-            <div className={`bg-white rounded-lg p-4 shadow-xl max-w-sm mx-4 border-2 ${detail.color}`} onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={() => setSelectedDate(null)}>
+            <div className={`bg-white rounded-lg p-4 shadow-xl max-w-sm w-full border-2 ${detail.color}`} onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-3">
-                <h5 className="font-bold text-sm">
-                  {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일 - {detail.title}
+                <h5 className="font-bold text-sm whitespace-pre-line">
+                  {selectedDate.getMonth() + 1}월 {selectedDate.getDate()}일
+                  {detail.title}
                 </h5>
                 <button onClick={() => setSelectedDate(null)} className="text-gray-400 hover:text-gray-600">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

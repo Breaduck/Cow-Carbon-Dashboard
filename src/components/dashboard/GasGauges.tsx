@@ -73,18 +73,19 @@ export function GasGauges({ farm }: GasGaugesProps) {
   });
 
   return (
-    <Card padding="lg">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-900">실시간 가스 농도</h3>
-        <span className="text-xs text-gray-500">최근 1시간 평균</span>
-      </div>
-      {/* 인사이트 알림 */}
-      {insights.length > 0 && (
-        <div className="mb-4 space-y-2">
+    <Card padding="none">
+      <div className="p-3 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3 sm:mb-4">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">실시간 가스 농도</h3>
+          <span className="text-xs text-gray-500">최근 1시간 평균</span>
+        </div>
+        {/* 인사이트 알림 */}
+        {insights.length > 0 && (
+          <div className="mb-3 sm:mb-4 space-y-2">
           {insights.map((insight, idx) => (
             <div
               key={idx}
-              className={`p-3 rounded-lg border-2 transition-all ${
+              className={`p-2.5 sm:p-3 rounded-lg border-2 transition-all ${
                 insight.severity === 'warning'
                   ? 'bg-red-50 border-red-500 shadow-lg shadow-red-200'
                   : 'bg-yellow-50 border-yellow-500 shadow-lg shadow-yellow-200'
@@ -93,15 +94,15 @@ export function GasGauges({ farm }: GasGaugesProps) {
                 animation: insight.severity === 'warning' ? 'pulse-slow 3s ease-in-out infinite' : 'pulse-slow 4s ease-in-out infinite'
               }}
             >
-              <div className="flex items-start gap-2">
-                <svg className={`w-5 h-5 flex-shrink-0 mt-0.5 ${insight.severity === 'warning' ? 'text-red-600' : 'text-yellow-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start gap-1.5 sm:gap-2">
+                <svg className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5 ${insight.severity === 'warning' ? 'text-red-600' : 'text-yellow-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <div className="flex-1">
-                  <p className={`text-sm font-bold mb-1 ${insight.severity === 'warning' ? 'text-red-900' : 'text-yellow-900'}`}>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs sm:text-sm font-bold mb-0.5 sm:mb-1 ${insight.severity === 'warning' ? 'text-red-900' : 'text-yellow-900'}`}>
                     {insight.gas} {insight.level}
                   </p>
-                  <p className={`text-sm font-semibold ${insight.severity === 'warning' ? 'text-red-800' : 'text-yellow-800'}`}>
+                  <p className={`text-xs sm:text-sm font-semibold ${insight.severity === 'warning' ? 'text-red-800' : 'text-yellow-800'}`}>
                     ⚠️ {insight.action}
                   </p>
                 </div>
@@ -111,35 +112,35 @@ export function GasGauges({ farm }: GasGaugesProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
-        {(Object.keys(GAS_INFO) as GasType[]).map(gasType => {
-          const info = GAS_INFO[gasType];
-          const value = currentValues[gasType];
-          const maxValue = gasType === 'CO2' ? 800 : gasType === 'N2O' ? 1 : gasType === 'CH4' ? 100 : 50;
-          const percentage = Math.min((value / maxValue) * 100, 100);
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
+          {(Object.keys(GAS_INFO) as GasType[]).map(gasType => {
+            const info = GAS_INFO[gasType];
+            const value = currentValues[gasType];
+            const maxValue = gasType === 'CO2' ? 800 : gasType === 'N2O' ? 1 : gasType === 'CH4' ? 100 : 50;
+            const percentage = Math.min((value / maxValue) * 100, 100);
 
-          const status = percentage < 60 ? 'normal' : percentage < 80 ? 'caution' : 'warning';
-          const borderColor = status === 'warning' ? 'border-red-500' : status === 'caution' ? 'border-yellow-500' : 'border-gray-200';
-          const shouldBlink = status === 'warning' || status === 'caution';
+            const status = percentage < 60 ? 'normal' : percentage < 80 ? 'caution' : 'warning';
+            const borderColor = status === 'warning' ? 'border-red-500' : status === 'caution' ? 'border-yellow-500' : 'border-gray-200';
+            const shouldBlink = status === 'warning' || status === 'caution';
 
-          return (
-            <div
-              key={gasType}
-              className={`p-4 rounded-xl bg-gray-50 border-2 ${borderColor} transition-all`}
-              style={shouldBlink ? {
-                animation: status === 'warning' ? 'pulse-slow 3s ease-in-out infinite' : 'pulse-slow 4s ease-in-out infinite',
-                boxShadow: status === 'warning' ? '0 0 20px rgba(239, 68, 68, 0.3)' : '0 0 20px rgba(234, 179, 8, 0.3)'
-              } : {}}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <p className="text-xs text-gray-500">{info.nameKo}</p>
-                  <p className="text-lg font-bold text-gray-900 mt-0.5">
-                    {value.toFixed(gasType === 'N2O' ? 2 : 1)}
-                    <span className="text-xs font-normal text-gray-500 ml-1">{info.unit}</span>
-                  </p>
+            return (
+              <div
+                key={gasType}
+                className={`p-2.5 sm:p-4 rounded-lg sm:rounded-xl bg-gray-50 border-2 ${borderColor} transition-all`}
+                style={shouldBlink ? {
+                  animation: status === 'warning' ? 'pulse-slow 3s ease-in-out infinite' : 'pulse-slow 4s ease-in-out infinite',
+                  boxShadow: status === 'warning' ? '0 0 20px rgba(239, 68, 68, 0.3)' : '0 0 20px rgba(234, 179, 8, 0.3)'
+                } : {}}
+              >
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div>
+                    <p className="text-xs text-gray-500">{info.nameKo}</p>
+                    <p className="text-base sm:text-lg font-bold text-gray-900 mt-0.5">
+                      {value.toFixed(gasType === 'N2O' ? 2 : 1)}
+                      <span className="text-xs font-normal text-gray-500 ml-1">{info.unit}</span>
+                    </p>
+                  </div>
                 </div>
-              </div>
 
               <div className="relative h-3 bg-gray-200 rounded-full overflow-visible">
                 {/* 현재 수치 바 */}
@@ -166,9 +167,10 @@ export function GasGauges({ farm }: GasGaugesProps) {
                   {percentage < 60 ? '✓ 정상' : percentage < 80 ? '⚠ 주의' : '🚨 경고'}
                 </p>
               </div>
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </Card>
   );

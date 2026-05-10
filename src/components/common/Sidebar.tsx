@@ -2,10 +2,39 @@ import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../../store/useStore';
 import { dashboardStats } from '../../data';
 import { LIVESTOCK_INFO } from '../../types';
+import { useState, useRef, useEffect } from 'react';
 
 export function Sidebar() {
   const location = useLocation();
-  const { isSidebarOpen, filters, setFilter, resetFilters } = useStore();
+  const { isSidebarOpen, filters, setFilter, resetFilters, toggleSidebar } = useStore();
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  // 스와이프 감지
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      // 왼쪽으로 75px 이상 스와이프
+      toggleSidebar();
+    }
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
+  useEffect(() => {
+    if (!isSidebarOpen) {
+      setTouchStart(0);
+      setTouchEnd(0);
+    }
+  }, [isSidebarOpen]);
 
   if (!isSidebarOpen) {
     return null;
@@ -19,10 +48,16 @@ export function Sidebar() {
       {/* 모바일 오버레이 */}
       <div
         className="fixed inset-0 bg-black/50 z-30 sm:hidden"
-        onClick={() => useStore.getState().toggleSidebar()}
+        onClick={() => toggleSidebar()}
       />
 
-      <aside className="fixed sm:sticky w-full sm:w-64 max-w-[240px] sm:max-w-none bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-64px)] top-16 left-0 z-40 sm:z-auto">
+      <aside
+        ref={sidebarRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="fixed sm:sticky w-full sm:w-64 max-w-[240px] sm:max-w-none bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-64px)] top-16 left-0 z-40 sm:z-auto"
+      >
       {/* 통계 요약 */}
       <div className="p-3 sm:p-4 border-b border-gray-100">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">

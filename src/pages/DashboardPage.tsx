@@ -38,7 +38,7 @@ export function DashboardPage() {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-6 space-y-3 sm:space-y-6">
         <FarmOverview farm={selectedFarm} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

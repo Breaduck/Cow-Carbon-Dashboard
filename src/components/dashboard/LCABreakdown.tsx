@@ -240,21 +240,21 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
   };
 
   return (
-    <Card padding="lg" className="backdrop-blur-xl bg-white/80">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+    <Card padding="none" className="backdrop-blur-xl bg-white/80">
+      <div className="p-3 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
           <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-1">탄소배출량 현황</h3>
-            <p className="text-base text-gray-600">{periodTitles[period]} 배출량 추이</p>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">탄소배출량 현황</h3>
+            <p className="text-sm sm:text-base text-gray-600">{periodTitles[period]} 배출량 추이</p>
           </div>
 
           {/* 비교 주기 선택 */}
-          <div className="flex gap-1 p-1 bg-gray-100 rounded-lg">
+          <div className="flex gap-1 p-1 bg-gray-100 rounded-lg w-fit">
             {(['daily', 'weekly', 'monthly'] as ComparisonPeriod[]).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-md transition-all ${
                   period === p
                     ? 'bg-white text-primary-700 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -268,33 +268,33 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       </div>
 
       {/* 총 배출량 비교 카드 */}
-      <div className="mb-6 p-6 rounded-xl bg-gray-50 border border-gray-200">
-        <div className="flex items-center justify-between mb-3">
+      <div className="mx-3 sm:mx-6 mb-4 sm:mb-6 p-4 sm:p-6 rounded-xl bg-gray-50 border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
           <div>
-            <p className="text-lg font-semibold text-gray-700 mb-3">총 탄소배출량 ({periodTitles[period]})</p>
-            <p className="text-5xl font-bold text-green-700">
+            <p className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">총 탄소배출량 ({periodTitles[period]})</p>
+            <p className="text-3xl sm:text-5xl font-bold text-green-700">
               {totalEmissions.toFixed(0).toLocaleString()}
-              <span className="text-2xl ml-2">kg CO₂eq</span>
+              <span className="text-lg sm:text-2xl ml-1 sm:ml-2">kg CO₂eq</span>
             </p>
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-sm text-gray-600">{periodLabels[period]} 대비</span>
-              <span className="text-base font-semibold">
+            <div className="mt-2 sm:mt-3 flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-gray-600">{periodLabels[period]} 대비</span>
+              <span className="text-sm sm:text-base font-semibold">
                 <TrendIcon trend={totalComparison.trend} changePercentage={totalComparison.changePercentage} />
               </span>
             </div>
           </div>
-          <div className="text-right">
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-1">직접 배출</p>
-              <p className="text-2xl font-bold text-gray-800">{totalDirect.toFixed(0).toLocaleString()}</p>
-              <span className="text-sm">
+          <div className="flex gap-6 sm:gap-8 sm:text-right">
+            <div>
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">직접 배출</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-800">{totalDirect.toFixed(0).toLocaleString()}</p>
+              <span className="text-xs sm:text-sm">
                 <TrendIcon trend={directComparison.trend} changePercentage={directComparison.changePercentage} />
               </span>
             </div>
             <div>
-              <p className="text-sm text-primary-600 mb-1">간접 배출</p>
-              <p className="text-2xl font-bold text-primary-800">{totalIndirect.toFixed(0).toLocaleString()}</p>
-              <span className="text-sm">
+              <p className="text-xs sm:text-sm text-primary-600 mb-1">간접 배출</p>
+              <p className="text-xl sm:text-2xl font-bold text-primary-800">{totalIndirect.toFixed(0).toLocaleString()}</p>
+              <span className="text-xs sm:text-sm">
                 <TrendIcon trend={indirectComparison.trend} changePercentage={indirectComparison.changePercentage} />
               </span>
             </div>
@@ -303,10 +303,10 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
         {/* 목표 달성도 */}
         {farm.livestock.type === 'pig' && (
-          <div className="pt-3 border-t border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-700">목표 대비 배출 비율</span>
-              <span className={`text-sm font-bold ${targetAchievementRate <= 100 ? 'text-green-600' : 'text-orange-600'}`}>
+          <div className="pt-2 sm:pt-3 border-t border-gray-200">
+            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+              <span className="text-xs sm:text-sm text-gray-700">목표 대비 배출 비율</span>
+              <span className={`text-sm sm:text-base font-bold ${targetAchievementRate <= 100 ? 'text-green-600' : 'text-orange-600'}`}>
                 {targetAchievementRate.toFixed(1)}%
               </span>
             </div>
@@ -336,14 +336,14 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
       {/* 개선 제안 (배출 증가 시에만 표시) */}
       {suggestions.length > 0 && (
-        <div className="mb-6">
-          <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="px-3 sm:px-6 mb-4 sm:mb-6">
+          <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
             개선 제안 ({suggestions.length}개)
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 gap-3 sm:gap-5">
             {suggestions.map((suggestion, idx) => {
               const severityStyles = {
                 high: {
@@ -384,20 +384,20 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
                 <button
                   key={idx}
                   onClick={() => setSelectedSuggestion(suggestion)}
-                  className={`p-6 rounded-2xl border-2 ${style.border} ${style.bg} ${style.shadow} hover:shadow-lg hover:scale-[1.02] transition-all text-left cursor-pointer relative`}
+                  className={`p-4 sm:p-6 rounded-xl sm:rounded-2xl border-2 ${style.border} ${style.bg} ${style.shadow} hover:shadow-lg hover:scale-[1.01] sm:hover:scale-[1.02] transition-all text-left cursor-pointer relative`}
                   style={{
                     animation: style.animation
                   }}
                 >
                   {/* 심각도 배지 */}
-                  <div className="mb-4">
-                    <span className={`text-xs px-3 py-1.5 rounded-full font-semibold ${style.badge}`}>
+                  <div className="mb-3 sm:mb-4">
+                    <span className={`text-xs px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full font-semibold ${style.badge}`}>
                       {severityBadge[suggestion.severity]}
                     </span>
                   </div>
 
                   {/* 제목 */}
-                  <h5 className={`text-lg font-bold mb-3 leading-tight ${style.text}`}>
+                  <h5 className={`text-sm sm:text-lg font-bold mb-2 sm:mb-3 leading-tight ${style.text}`}>
                     {suggestion.title.split(' - ').map((part, i) => (
                       <span key={i}>
                         {i > 0 && (
@@ -431,9 +431,9 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       )}
 
       {/* 배출 구성 비율 */}
-      <div className="mb-6">
-        <h4 className="text-base font-semibold text-gray-700 mb-4">배출원별 구성</h4>
-        <div className="space-y-3">
+      <div className="px-3 sm:px-6 mb-4 sm:mb-6">
+        <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3 sm:mb-4">배출원별 구성</h4>
+        <div className="space-y-2.5 sm:space-y-3">
           {categories.map(category => {
             const percentage = (category.value / totalEmissions * 100).toFixed(1);
             const barWidth = (category.value / maxValue * 100).toFixed(1);
@@ -441,26 +441,26 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
 
             return (
               <div key={category.name}>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-start sm:items-center justify-between mb-1 gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                     <div
-                      className="w-3 h-3 rounded-full"
+                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: category.color }}
                     />
-                    <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-700">{category.name}</span>
                     {(category as any).tooltip && (
-                      <span className="text-xs text-gray-500">({(category as any).tooltip})</span>
+                      <span className="text-xs text-gray-500 hidden sm:inline">({(category as any).tooltip})</span>
                     )}
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                    <span className="text-xs px-1.5 py-0.5 sm:px-2 rounded-full bg-gray-100 text-gray-600">
                       {category.type === 'direct' ? '직접' : '간접'}
                     </span>
                   </div>
-                  <div className="text-right flex items-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {category.value.toLocaleString()} kg
+                  <div className="text-right flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                      {category.value.toLocaleString()}
                     </span>
                     <span className="text-xs text-gray-500">({percentage}%)</span>
-                    <span className="text-xs w-16 text-right">
+                    <span className="text-xs w-12 sm:w-16 text-right">
                       <TrendIcon trend={comparison.trend} changePercentage={comparison.changePercentage} />
                     </span>
                   </div>
@@ -487,42 +487,42 @@ export function LCABreakdown({ farm }: LCABreakdownProps) {
       </div>
 
       {/* 월간 투입량 */}
-      <div className="border-t border-gray-200 pt-6">
-        <h4 className="text-base font-semibold text-gray-700 mb-4">월간 투입량</h4>
-        <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 rounded-lg bg-green-50 border border-green-100">
-            <p className="text-xs text-green-700 mb-1">전력</p>
-            <p className="text-lg font-bold text-green-900">
+      <div className="px-3 sm:px-6 border-t border-gray-200 pt-4 sm:pt-6 pb-3 sm:pb-0">
+        <h4 className="text-sm sm:text-base font-semibold text-gray-700 mb-3 sm:mb-4">월간 투입량</h4>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="p-2 sm:p-3 rounded-lg bg-green-50 border border-green-100">
+            <p className="text-xs text-green-700 mb-0.5 sm:mb-1">전력</p>
+            <p className="text-sm sm:text-lg font-bold text-green-900">
               {monthlyInputs.electricityUsage.toLocaleString()}
-              <span className="text-xs ml-1">kWh</span>
+              <span className="text-xs ml-0.5 sm:ml-1">kWh</span>
             </p>
-            <p className="text-xs text-green-600 mt-1">
+            <p className="text-xs text-green-600 mt-0.5 sm:mt-1">
               <TrendIcon
                 trend={calculateComparison(monthlyInputs.electricityUsage, previousData.monthlyInputs.electricityUsage).trend}
                 changePercentage={calculateComparison(monthlyInputs.electricityUsage, previousData.monthlyInputs.electricityUsage).changePercentage}
               />
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-yellow-50 border border-yellow-100">
-            <p className="text-xs text-yellow-700 mb-1">경유</p>
-            <p className="text-lg font-bold text-yellow-900">
+          <div className="p-2 sm:p-3 rounded-lg bg-yellow-50 border border-yellow-100">
+            <p className="text-xs text-yellow-700 mb-0.5 sm:mb-1">경유</p>
+            <p className="text-sm sm:text-lg font-bold text-yellow-900">
               {monthlyInputs.dieselUsage.toLocaleString()}
-              <span className="text-xs ml-1">L</span>
+              <span className="text-xs ml-0.5 sm:ml-1">L</span>
             </p>
-            <p className="text-xs text-yellow-600 mt-1">
+            <p className="text-xs text-yellow-600 mt-0.5 sm:mt-1">
               <TrendIcon
                 trend={calculateComparison(monthlyInputs.dieselUsage, previousData.monthlyInputs.dieselUsage).trend}
                 changePercentage={calculateComparison(monthlyInputs.dieselUsage, previousData.monthlyInputs.dieselUsage).changePercentage}
               />
             </p>
           </div>
-          <div className="p-3 rounded-lg bg-purple-50 border border-purple-100">
-            <p className="text-xs text-purple-700 mb-1">LPG</p>
-            <p className="text-lg font-bold text-purple-900">
+          <div className="p-2 sm:p-3 rounded-lg bg-purple-50 border border-purple-100">
+            <p className="text-xs text-purple-700 mb-0.5 sm:mb-1">LPG</p>
+            <p className="text-sm sm:text-lg font-bold text-purple-900">
               {monthlyInputs.lpgUsage.toLocaleString()}
-              <span className="text-xs ml-1">kg</span>
+              <span className="text-xs ml-0.5 sm:ml-1">kg</span>
             </p>
-            <p className="text-xs text-purple-600 mt-1">
+            <p className="text-xs text-purple-600 mt-0.5 sm:mt-1">
               <TrendIcon
                 trend={calculateComparison(monthlyInputs.lpgUsage, previousData.monthlyInputs.lpgUsage).trend}
                 changePercentage={calculateComparison(monthlyInputs.lpgUsage, previousData.monthlyInputs.lpgUsage).changePercentage}

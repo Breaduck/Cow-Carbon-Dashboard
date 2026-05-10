@@ -79,14 +79,14 @@ export function EmissionChart({ farm }: EmissionChartProps) {
 
   return (
     <Card padding="none">
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center justify-between">
+      <div className="p-3 sm:p-6 border-b border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">배출량 추이</h3>
-            <p className="text-sm text-gray-500 mt-0.5">시간별 온실가스 배출량 변화</p>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">배출량 추이</h3>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">시간별 온실가스 배출량 변화</p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             {/* 변화율 표시 */}
             {stats && (
               <div className="text-right">
@@ -102,12 +102,12 @@ export function EmissionChart({ farm }: EmissionChartProps) {
               </div>
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {timeRanges.map(({ value, label }) => (
                 <button
                   key={value}
                   onClick={() => setTimeRange(value)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                     timeRange === value
                       ? 'bg-gray-900 text-white shadow-sm'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -120,12 +120,12 @@ export function EmissionChart({ farm }: EmissionChartProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-4">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-3 sm:mt-4">
           {(Object.keys(GAS_INFO) as GasType[]).map(gas => (
             <button
               key={gas}
               onClick={() => setSelectedGas(gas)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-medium transition-all ${
                 selectedGas === gas
                   ? 'text-white shadow-sm'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -138,22 +138,24 @@ export function EmissionChart({ farm }: EmissionChartProps) {
         </div>
       </div>
 
-      <div className="p-6">
-        <div className="h-[250px] sm:h-[300px] md:h-[350px]">
+      <div className="p-3 sm:p-6">
+        <div className="h-[200px] sm:h-[250px] md:h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
               dataKey="label"
               stroke="#9ca3af"
-              fontSize={12}
+              fontSize={10}
               tickLine={false}
+              angle={0}
             />
             <YAxis
               stroke="#9ca3af"
-              fontSize={12}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
+              width={35}
             />
             <Tooltip
               contentStyle={{
@@ -161,11 +163,12 @@ export function EmissionChart({ farm }: EmissionChartProps) {
                 border: 'none',
                 borderRadius: '8px',
                 color: 'white',
-                fontSize: '12px',
+                fontSize: '11px',
+                padding: '6px 8px',
               }}
             />
             <Legend
-              wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }}
+              wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }}
             />
             <Line
               type="monotone"
@@ -181,7 +184,7 @@ export function EmissionChart({ farm }: EmissionChartProps) {
                 y={data[0].target}
                 stroke="#ef4444"
                 strokeDasharray="3 3"
-                label={{ value: '목표', position: 'right', fill: '#ef4444', fontSize: 12 }}
+                label={{ value: '목표', position: 'right', fill: '#ef4444', fontSize: 10 }}
               />
             )}
             {data[0]?.average && (
@@ -189,7 +192,7 @@ export function EmissionChart({ farm }: EmissionChartProps) {
                 y={data[0].average}
                 stroke="#3b82f6"
                 strokeDasharray="3 3"
-                label={{ value: '평균', position: 'right', fill: '#3b82f6', fontSize: 12 }}
+                label={{ value: '평균', position: 'right', fill: '#3b82f6', fontSize: 10 }}
               />
             )}
             {/* 최고점 표시 */}
@@ -197,16 +200,16 @@ export function EmissionChart({ farm }: EmissionChartProps) {
               <ReferenceDot
                 x={stats.maxPoint.label}
                 y={stats.max}
-                r={6}
+                r={4}
                 fill="#dc2626"
                 stroke="#fff"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 label={{
                   value: `최고 ${stats.max.toFixed(1)}`,
                   position: 'top',
                   fill: '#dc2626',
-                  fontSize: 11,
-                  offset: 10
+                  fontSize: 9,
+                  offset: 8
                 }}
               />
             )}
@@ -215,16 +218,16 @@ export function EmissionChart({ farm }: EmissionChartProps) {
               <ReferenceDot
                 x={stats.minPoint.label}
                 y={stats.min}
-                r={6}
+                r={4}
                 fill="#dc2626"
                 stroke="#fff"
-                strokeWidth={2}
+                strokeWidth={1.5}
                 label={{
                   value: `최저 ${stats.min.toFixed(1)}`,
                   position: 'bottom',
                   fill: '#dc2626',
-                  fontSize: 11,
-                  offset: 10
+                  fontSize: 9,
+                  offset: 8
                 }}
               />
             )}
