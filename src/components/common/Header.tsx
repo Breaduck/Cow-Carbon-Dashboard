@@ -38,7 +38,7 @@ export function Header() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gray-900">축산 저탄소 실측</h1>
-            <p className="text-xs text-gray-500">축산물품질평가원 관리자</p>
+            <p className="text-xs sm:text-sm text-gray-500">축산물품질평가원 관리자</p>
           </div>
         </Link>
       </div>
@@ -86,10 +86,10 @@ export function Header() {
 
           {/* 알림 드롭다운 */}
           {showAlerts && (
-            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-[90vw] sm:w-80 max-w-sm bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                 <span className="font-medium text-gray-900">알림</span>
-                <span className="text-xs text-gray-500">{unreadAlertCount}개 읽지 않음</span>
+                <span className="text-xs sm:text-sm text-gray-500">{unreadAlertCount}개 읽지 않음</span>
               </div>
               <div className="max-h-80 overflow-y-auto">
                 {recentAlerts.length === 0 ? (
@@ -116,7 +116,7 @@ export function Header() {
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-gray-900 font-medium">{alert.message}</p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-500 mt-1">
                             {new Date(alert.timestamp).toLocaleString('ko-KR')}
                           </p>
                         </div>

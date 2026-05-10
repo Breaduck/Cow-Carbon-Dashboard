@@ -153,7 +153,7 @@ export function RegionalDetailModal({
     <Modal isOpen={isOpen} onClose={onClose} title={`${region} 종합 인사이트`} size="xl">
       <div className="space-y-6">
         {/* 전체 요약 */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <button
             onClick={() => setSelectedStatus(selectedStatus === 'critical' ? null : 'critical')}
             className="bg-red-50 rounded-lg p-4 border-2 border-red-200 hover:bg-red-100 transition-colors cursor-pointer text-left"
@@ -194,7 +194,7 @@ export function RegionalDetailModal({
               {selectedStatus === 'warning' && '경고 농가 목록'}
               {selectedStatus === 'good' && '양호 농가 목록'}
             </h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {(selectedStatus === 'critical' ? regionalData.criticalFarms :
                 selectedStatus === 'warning' ? regionalData.warningFarms :
                 regionalData.goodFarms).map((farm) => (
@@ -227,7 +227,7 @@ export function RegionalDetailModal({
         )}
 
         {/* 차트 영역 */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {/* 농가 상태 분포 */}
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="text-base font-semibold text-gray-900 mb-3">농가 상태 분포</h3>
@@ -278,7 +278,7 @@ export function RegionalDetailModal({
         {/* 배출량 비교 */}
         <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg p-5 border border-primary-200">
           <h3 className="text-base font-semibold text-primary-900 mb-3">지역 vs 전국 평균 배출량</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <div className="text-sm text-primary-700 mb-1">지역 평균</div>
               <div className="text-2xl font-bold text-primary-900">
@@ -329,7 +329,7 @@ export function RegionalDetailModal({
                   {/* 농가 목록 확장 */}
                   {selectedIssue?.category === issue.category && (
                     <div className="mt-3 pt-3 border-t border-orange-300">
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {issue.farms.map((farmName) => {
                           const farm = regionalData.regionalFarms.find(f => f.name === farmName);
                           if (!farm) return null;

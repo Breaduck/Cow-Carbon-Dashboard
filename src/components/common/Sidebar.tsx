@@ -15,7 +15,14 @@ export function Sidebar() {
   const grades = ['A', 'B', 'C'] as const;
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-64px)] sticky top-16">
+    <>
+      {/* 모바일 오버레이 */}
+      <div
+        className="fixed inset-0 bg-black/50 z-30 sm:hidden"
+        onClick={() => useStore.getState().toggleSidebar()}
+      />
+
+      <aside className="fixed sm:sticky w-full sm:w-64 max-w-xs sm:max-w-none bg-white border-r border-gray-200 flex flex-col h-[calc(100vh-64px)] top-16 left-0 z-40 sm:z-auto">
       {/* 통계 요약 */}
       <div className="p-4 border-b border-gray-100">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
@@ -188,5 +195,6 @@ export function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

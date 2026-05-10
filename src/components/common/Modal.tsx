@@ -46,14 +46,14 @@ export function Modal({
   if (!isOpen) return null;
 
   const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-xl',
-    xl: 'max-w-4xl',
+    sm: 'max-w-[90vw] sm:max-w-sm',
+    md: 'max-w-[95vw] sm:max-w-md',
+    lg: 'max-w-[95vw] sm:max-w-xl',
+    xl: 'max-w-[98vw] sm:max-w-4xl',
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
@@ -62,11 +62,11 @@ export function Modal({
 
       {/* Modal content */}
       <div
-        className={`relative w-full ${sizeClasses[size]} my-8 bg-white rounded-xl shadow-xl max-h-[90vh] flex flex-col`}
+        className={`relative w-full ${sizeClasses[size]} my-2 sm:my-8 bg-white rounded-xl shadow-xl max-h-[90vh] flex flex-col`}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-100 flex-shrink-0">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
@@ -80,7 +80,7 @@ export function Modal({
         )}
 
         {/* Body */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 px-4 py-3 sm:p-6 overflow-y-auto">
           {children}
         </div>
       </div>

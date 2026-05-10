@@ -23,7 +23,8 @@ export function LivestockPieChart({ beefCount, pigCount, dairyCount }: Livestock
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <div className="h-[250px] sm:h-[300px]">
+      <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie
           data={data}
@@ -43,5 +44,6 @@ export function LivestockPieChart({ beefCount, pigCount, dairyCount }: Livestock
         <Legend />
       </PieChart>
     </ResponsiveContainer>
+    </div>
   );
 }

@@ -94,7 +94,7 @@ export function RegionalStatsPage() {
                 onRegionClick={setSelectedRegion}
               />
             </div>
-            <div className="mt-4 text-xs text-gray-500 text-center">
+            <div className="mt-4 text-xs sm:text-sm text-gray-500 text-center">
               권역을 클릭하면 상세 정보를 확인할 수 있습니다
             </div>
           </div>
@@ -166,25 +166,25 @@ export function RegionalStatsPage() {
             <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-3 sm:px-6 text-left text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                   지역
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-3 sm:px-6 text-center text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                   전체
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-3 sm:px-6 text-center text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                   <div className="flex items-center justify-center gap-1">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LIVESTOCK_INFO.beef_cattle.color }} />
                     한우
                   </div>
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-3 sm:px-6 text-center text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                   <div className="flex items-center justify-center gap-1">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LIVESTOCK_INFO.pig.color }} />
                     돼지
                   </div>
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-3 sm:px-6 text-center text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                   <div className="flex items-center justify-center gap-1">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: LIVESTOCK_INFO.dairy_cattle.color }} />
                     젖소
@@ -199,40 +199,40 @@ export function RegionalStatsPage() {
                   className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-primary-50 transition-colors cursor-pointer`}
                   onClick={() => setSelectedRegion(stat.region)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{stat.regionShort}</div>
+                  <td className="px-3 py-4 sm:px-6 whitespace-nowrap">
+                    <div className="text-sm sm:text-base font-medium text-gray-900">{stat.regionShort}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="text-sm font-bold text-gray-900">{stat.total}</div>
+                  <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                    <div className="text-sm sm:text-base font-bold text-gray-900">{stat.total}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="text-sm text-gray-600">{stat.beef > 0 ? stat.beef : '-'}</div>
+                  <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                    <div className="text-sm sm:text-base text-gray-600">{stat.beef > 0 ? stat.beef : '-'}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="text-sm text-gray-600">{stat.pig > 0 ? stat.pig : '-'}</div>
+                  <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                    <div className="text-sm sm:text-base text-gray-600">{stat.pig > 0 ? stat.pig : '-'}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="text-sm text-gray-600">{stat.dairy > 0 ? stat.dairy : '-'}</div>
+                  <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                    <div className="text-sm sm:text-base text-gray-600">{stat.dairy > 0 ? stat.dairy : '-'}</div>
                   </td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="bg-primary-50 border-t-2 border-primary-200">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-bold text-primary-900">합계</div>
+                <td className="px-3 py-4 sm:px-6 whitespace-nowrap">
+                  <div className="text-sm sm:text-base font-bold text-primary-900">합계</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <div className="text-sm font-bold text-primary-900">{totalStats.total}</div>
+                <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                  <div className="text-sm sm:text-base font-bold text-primary-900">{totalStats.total}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <div className="text-sm font-bold text-primary-900">{totalStats.beef}</div>
+                <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                  <div className="text-sm sm:text-base font-bold text-primary-900">{totalStats.beef}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <div className="text-sm font-bold text-primary-900">{totalStats.pig}</div>
+                <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                  <div className="text-sm sm:text-base font-bold text-primary-900">{totalStats.pig}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <div className="text-sm font-bold text-primary-900">{totalStats.dairy}</div>
+                <td className="px-3 py-4 sm:px-6 whitespace-nowrap text-center">
+                  <div className="text-sm sm:text-base font-bold text-primary-900">{totalStats.dairy}</div>
                 </td>
               </tr>
             </tfoot>

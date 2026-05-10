@@ -139,7 +139,8 @@ export function EmissionChart({ farm }: EmissionChartProps) {
       </div>
 
       <div className="p-6">
-        <ResponsiveContainer width="100%" height={350}>
+        <div className="h-[250px] sm:h-[300px] md:h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
@@ -229,6 +230,7 @@ export function EmissionChart({ farm }: EmissionChartProps) {
             )}
           </LineChart>
         </ResponsiveContainer>
+        </div>
       </div>
     </Card>
   );
