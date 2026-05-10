@@ -116,7 +116,7 @@ export const useStore = create<AppState>((set, get) => ({
   setTimeRange: (range) => set({ timeRange: range }),
 
   // 사이드바
-  isSidebarOpen: true,
+  isSidebarOpen: false,
   toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
 
   // 모달
