@@ -47,7 +47,7 @@ export function KoreaRegionMap({ regionalStats, onRegionClick }: KoreaRegionMapP
         className="absolute inset-0 bg-contain bg-center bg-no-repeat"
         style={{
           backgroundImage: 'url(/korea-map.png)',
-          opacity: 0.35,
+          opacity: 0.7,
           filter: 'grayscale(100%)'
         }}
       />
